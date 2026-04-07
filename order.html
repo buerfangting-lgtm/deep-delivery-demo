@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>归档控制台 — DeepDelivery</title>
+    <link rel="stylesheet" href="styles/theme.css">
+    <style>
+        .page-layout { display: flex; flex-direction: column; height: 100vh; background: var(--gray-950); }
+
+        .page-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; gap: 12px;
+            background: rgba(3, 7, 18, 0.4); backdrop-filter: blur(12px); z-index: 100;
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+
+        /* Search Bar */
+        .search-container { position: relative; width: 100%; }
+        .search-input {
+            width: 100%; padding: 10px 16px 10px 40px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            border-radius: 12px; color: var(--white); font-size: 14px; font-weight: 600;
+            transition: all 0.3s;
+        }
+        .search-input:focus { background: rgba(255,255,255,0.08); border-color: var(--blue-500); outline: none; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+
+        /* Main Viewport */
+        .viewport { flex: 1; overflow-y: auto; position: relative; }
+        .page-section { display: none; height: 100%; flex-direction: column; }
+        .page-section.active { display: flex; }
+
+        /* Status Filter (Pool Page) */
+        .filter-bar {
+            display: flex; overflow-x: auto; padding: 12px 20px; gap: 8px;
+            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-item {
+            white-space: nowrap; padding: 6px 14px; border-radius: var(--radius-full);
+            font-size: 12px; font-weight: 800; color: var(--gray-500);
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            transition: all 0.2s; cursor: pointer;
+        }
+        .filter-item.active { background: var(--blue-600); color: var(--white); border-color: var(--blue-500); box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+
+        /* Scroll Area */
+        .scroll-area { flex: 1; overflow-y: auto; padding: 20px 20px 100px; }
+        .section-label { font-size: 11px; font-weight: 900; color: var(--gray-500); letter-spacing: 1.5px; margin: 24px 0 16px; text-transform: uppercase; }
+
+        /* Order Card (Pool) */
+        .order-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl); padding: 18px; margin-bottom: 16px;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .order-card:active { transform: scale(0.98); background: var(--glass-bg-hover); }
+        .order-card.expanded { border-color: var(--blue-500); }
+        
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .order-id { font-size: 11px; color: var(--gray-600); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+        
+        .status-badge { font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--amber-500); }
+        .status-processing { background: rgba(37,99,235,0.15); color: var(--blue-400); }
+        .status-completed { background: rgba(34, 197, 94, 0.15); color: var(--green-400); }
+        .status-archived { background: var(--glass-bg); color: var(--gray-500); }
+        .status-closed { background: rgba(255,255,255,0.02); color: var(--gray-700); }
+
+        .order-title { font-size: 17px; font-weight: 800; color: var(--white); margin-bottom: 8px; letter-spacing: -0.2px; }
+        .order-meta { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+        .order-detail-panel { display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--glass-border); }
+        .order-card.expanded .order-detail-panel { display: block; animation: fadeInUp 0.3s ease; }
+
+        /* Summary mimicking driver detail */
+        .task-summary { background: rgba(255,255,255,0.02); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--glass-border); margin-bottom: 16px; }
+        .summary-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; font-weight: 700; }
+        .summary-label { color: var(--gray-500); width: 64px; flex-shrink: 0; }
+        .summary-val { color: var(--gray-300); flex: 1; line-height: 1.5; }
+        .summary-val b { color: var(--blue-400); }
+        .issue-text { color: var(--rose-500); }
+        .photo-badge { font-size: 10px; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; margin-left: 4px; color: var(--gray-400); }
+
+        .action-row { display: flex; gap: 10px; margin-top: 12px; }
+        .btn-outline { flex: 1; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--gray-400); font-size: 12px; font-weight: 800; cursor: pointer; text-align: center; }
+
+        /* Profile Styles */
+        .profile-header { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-600), var(--violet-500)); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 4px solid var(--glass-border); }
+        .user-name { font-size: 24px; font-weight: 900; }
+        .user-role { font-size: 12px; font-weight: 800; color: var(--gray-500); padding: 4px 12px; background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--glass-border); }
+        .menu-list { padding: 0 20px; }
+        .menu-item { padding: 18px 0; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .menu-label { font-size: 15px; font-weight: 700; color: var(--gray-300); }
+
+        /* Create Order Button */
+        .create-order-btn {
+            background: linear-gradient(135deg, var(--blue-600), var(--blue-700));
+            color: white; border: none; padding: 14px 24px; border-radius: 16px;
+            font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+            gap: 10px; margin: 20px; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.3); transition: all 0.3s;
+        }
+        .create-order-btn:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* My Orders (Audit) Styles */
+        .inner-tabs { display: flex; padding: 0 20px; gap: 10px; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; background: rgba(0,0,0,0.2); }
+        .inner-tab { padding: 14px 10px; font-size: 13px; font-weight: 800; color: var(--gray-500); cursor: pointer; position: relative; }
+        .inner-tab.active { color: var(--white); }
+        .inner-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--blue-500); border-radius: var(--radius-full); }
+        .inner-tab .badge { background: var(--rose-500); color: var(--white); font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
+
+        .audit-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: 18px; margin-bottom: 16px; border-left: 4px solid transparent; }
+        .type-add { border-left-color: var(--green-500); }
+        .type-swap { border-left-color: var(--rose-500); }
+        .audit-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+        .point-name { font-size: 17px; font-weight: 800; color: var(--white); }
+        .audit-btn { width: 100%; padding: 14px; background: var(--blue-600); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer; }
+
+        .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: var(--green-500); color: var(--white); padding: 14px 28px; border-radius: var(--radius-full); font-weight: 900; font-size: 14px; display: none; z-index: 5000; }
+
+        /* Timeline Styles */
+        .timeline { margin-top: 16px; position: relative; padding-left: 20px; border-left: 1px dashed var(--glass-border); margin-left: 6px; }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot { position: absolute; left: -25px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--gray-700); border: 2px solid var(--gray-950); }
+        .timeline-item.active .timeline-dot { background: var(--blue-500); box-shadow: 0 0 8px var(--blue-500); }
+        .timeline-item.completed .timeline-dot { background: var(--green-500); }
+        
+        .timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .timeline-role { font-size: 10px; font-weight: 900; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+        .timeline-time { font-size: 10px; color: var(--gray-600); }
+        .timeline-content { font-size: 13px; color: var(--gray-300); line-height: 1.6; font-weight: 600; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
+        .timeline-evidence { display: flex; gap: 8px; margin-top: 6px; }
+        .evidence-tag { font-size: 10px; background: rgba(37,99,235,0.1); color: var(--blue-400); padding: 2px 6px; border-radius: 4px; font-weight: 800; }
+        
+        .archive-action-btn { width: 100%; padding: 14px; background: var(--blue-600); color: var(--white); border: none; border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 16px rgba(37,99,235,0.2); }
+    </style>
+</head>
+<body>
+    <div class="page-layout">
+        <header class="page-header">
+            <div class="header-top">
+                <span class="page-title" id="pageTitle">售后工单池</span>
+                <div class="page-header-right">
+                    <a href="select.html" class="switch-btn">🔄 切换角色</a>
+                    <span class="header-badge">订单员</span>
+                </div>
+            </div>
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索售后工单、网点、单号...">
+            </div>
+        </header>
+
+        <div class="viewport">
+            <!-- PAGE: 工单池 -->
+            <section id="pool" class="page-section active">
+                <div class="filter-bar">
+                    <div class="filter-item active" onclick="filterPool('all', this)">全部</div>
+                    <div class="filter-item" onclick="filterPool('pending', this)">待处理</div>
+                    <div class="filter-item" onclick="filterPool('processing', this)">处理中</div>
+                    <div class="filter-item" onclick="filterPool('completed', this)">已完成</div>
+                    <div class="filter-item" onclick="filterPool('archived', this)">已归档</div>
+                    <div class="filter-item" onclick="filterPool('closed', this)">已关闭</div>
+                </div>
+                <div class="scroll-area" id="poolList">
+                    <!-- Data will be populated here -->
+                </div>
+            </section>
+
+            <!-- PAGE: 我的工单 -->
+            <section id="my" class="page-section">
+                <button class="create-order-btn" onclick="showToast('📋 请描述需要发起的售后内容...')">
+                    <span>➕ 发起售后工单 (调度侧)</span>
+                </button>
+                
+                <div class="inner-tabs">
+                    <div class="inner-tab active" onclick="switchInnerTab('my-pending')">待处理 <span class="badge" id="myPendingBadge">1</span></div>
+                    <div class="inner-tab" onclick="switchInnerTab('my-history')">已处理历史</div>
+                </div>
+                
+                <div id="my-orders-list" class="scroll-area">
+                    <!-- My submitted orders will be populated here -->
+                </div>
+            </section>
+
+            <!-- PAGE: 个人中心 -->
+            <section id="profile" class="page-section">
+                <div class="profile-header">
+                    <div class="avatar">👨‍💻</div>
+                    <div class="user-name">订单专员 A</div>
+                    <div class="user-role">总调度中心 · 归档组</div>
+                </div>
+                <div class="menu-list">
+                    <div class="menu-item"><span class="menu-label">工单处理统计</span></div>
+                    <div class="menu-item"><span class="menu-label">数据同步状态</span><span style="color:var(--green-500); font-weight:800; font-size:13px;">正常</span></div>
+                    <div class="menu-item"><span class="menu-label">消息设置</span></div>
+                </div>
+            </section>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchMainTab('pool')">
+                <span class="nav-icon">📊</span>
+                <span>工单池</span>
+            </div>
+            <div class="nav-item" onclick="switchMainTab('my')">
+                <span class="nav-icon">📝</span>
+                <span>我的工单</span>
+            </div>
+            <div class="nav-item" onclick="switchMainTab('profile')">
+                <span class="nav-icon">👤</span>
+                <span>个人中心</span>
+            </div>
+        </nav>
+    </div>
+
+    <div class="toast" id="toast">✅ 操作成功</div>
+
+    <script>
+        const orders = [
+            { 
+                id: '77235', point: '温州二中', type: '补货', status: 'processing', time: '刚刚更新', 
+                history: [
+                    { role: '司机 [张师傅]', time: '07:20', content: '发现番茄损耗严重（约 2kg），已通过语音上报并拍摄照片。', evidence: ['📷 损耗照片', '🎙️ 原始语音'] },
+                    { role: '售后专员 [小陈]', time: '08:05', content: '已接单。核实照片属实，已同步仓库配货组。', evidence: ['✅ 核实通过'] },
+                    { role: '调度中心', time: '08:15', content: '正在安排下一班次配送车辆补送。', active: true }
+                ]
+            },
+            { 
+                id: '77232', point: '实验小学', type: '换货', status: 'pending', time: '5分钟前', 
+                history: [
+                    { role: '司机 [李师傅]', time: '07:45', content: '青菜变黄严重，客户拒收申请换货。', evidence: ['📷 实物照片'] },
+                    { role: '系统', time: '07:46', content: '已自动触发换货流程，等待人工认领。', active: true }
+                ]
+            },
+            { 
+                id: '77228', point: '温州三中', type: '退货', status: 'completed', time: '15分钟前', 
+                history: [
+                    { role: '司机 [王师傅]', time: '06:30', content: '菜品品质异常（受潮），申请退回。', evidence: ['📷 异常照片'] },
+                    { role: '售后专员 [小林]', time: '07:10', content: '已核实品质问题，下达准予退回指令，司机已将货物带回。', evidence: ['✅ 准予退回'] },
+                    { role: '售后结论', time: '07:15', content: '✅ 处理完成：确认品质损耗，待归档审计。', active: true }
+                ]
+            },
+            { 
+                id: '77215', point: '市府食堂', type: '补货', status: 'archived', time: '1小时前', 
+                history: [
+                    { role: '司机 [赵师傅]', time: '05:50', content: '土豆质量不佳，客户要求补发。' },
+                    { role: '售后专员 [系统]', time: '06:10', content: 'AI 识别详情，自动审批补发。' },
+                    { role: '订单员 [A]', time: '08:30', content: '已核实账目，完成财务补差 ￥48.00 并归档。', completed: true }
+                ]
+            },
+            { 
+                id: '77190', point: '人民医院', type: '换货', status: 'closed', time: '3小时前', 
+                history: [
+                    { role: '司机 [孙师傅]', time: '04:20', content: '客户反馈规格不对，初次申请换货。' },
+                    { role: '司机 [孙师傅]', time: '04:40', content: '❌ 客户撤回：经自查发现是仓库发错但医院决定保留。', completed: true }
+                ]
+            }
+        ];
+
+        const clerkOrders = [
+            {
+                id: 'MY-001', point: '温州八中', type: '补货', status: 'pending', time: '刚刚',
+                history: [
+                    { role: '订单员 [A]', time: '09:45', content: '仓储反馈出库土豆少装了 2 筐，主动发起补货申请。', evidence: ['💻 办公端发起'] }
+                ]
+            },
+            {
+                id: 'MY-002', point: '中心医院', type: '退货', status: 'completed', time: '2小时前',
+                history: [
+                    { role: '订单员 [A]', time: '07:30', content: '核对库存时发现多发了一箱苹果，已联系司机带回。' },
+                    { role: '售后专员 [小林]', time: '08:15', content: '已收到实物，确认退回。', completed: true }
+                ]
+            }
+        ];
+
+        function renderPool(filter = 'all') {
+            const list = document.getElementById('poolList');
+            list.innerHTML = '';
+            
+            const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+            
+            filtered.forEach(o => {
+                const card = document.createElement('div');
+                card.id = `card-${o.id}`;
+                card.className = `order-card animate-fadeInUp`;
+                card.onclick = (e) => {
+                    if (e.target.tagName !== 'BUTTON') {
+                        card.classList.toggle('expanded');
+                    }
+                };
+                
+                const statusMap = {
+                    'pending': { text: '待处理', class: 'status-pending' },
+                    'processing': { text: '处理中', class: 'status-processing' },
+                    'completed': { text: '已处理', class: 'status-completed' },
+                    'archived': { text: '已归档', class: 'status-archived' },
+                    'closed': { text: '已关闭', class: 'status-closed' }
+                };
+                
+                const s = statusMap[o.status];
+                
+                // Construct Timeline HTML
+                let timelineHtml = '<div class="timeline">';
+                o.history.forEach(h => {
+                    let evidenceHtml = '';
+                    if (h.evidence) {
+                        evidenceHtml = '<div class="timeline-evidence">' + 
+                            h.evidence.map(e => `<span class="evidence-tag">${e}</span>`).join('') + 
+                            '</div>';
+                    }
+                    
+                    timelineHtml += `
+                        <div class="timeline-item ${h.active ? 'active' : ''} ${h.completed ? 'completed' : ''}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-header">
+                                <span class="timeline-role">${h.role}</span>
+                                <span class="timeline-time">${h.time || ''}</span>
+                            </div>
+                            <div class="timeline-content">
+                                ${h.content}
+                                ${evidenceHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+                timelineHtml += '</div>';
+
+                card.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">NO.${o.id}</span>
+                        <span class="status-badge ${s.class}">${s.text}</span>
+                    </div>
+                    <div class="order-title">${o.point} · ${o.type}</div>
+                    <div class="order-meta">
+                        <span>🕒 ${o.time}</span>
+                        <span>📄 ${o.history.length} 条记录</span>
+                    </div>
+                    <div class="order-detail-panel">
+                        <div style="font-size:11px; color:var(--gray-500); font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">工单全生命周期追踪</div>
+                        ${timelineHtml}
+                        <div class="action-row" style="margin-top:20px;">
+                            ${o.status === 'completed' ? `<button class="archive-action-btn" onclick="archivePool('${o.id}')">确认并结案归档</button>` : ''}
+                        </div>
+                        <div class="action-row" style="margin-top:10px;">
+                            <div class="btn-outline">导出工单报告</div>
+                            <div class="btn-outline">联系链路节点</div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function archivePool(orderId) {
+            showToast("✅ 该工单已成功归档并移至历史记录");
+            const card = document.getElementById(`card-${orderId}`);
+            if (card) {
+                card.style.opacity = '0.3';
+                card.style.pointerEvents = 'none';
+            }
+        }
+
+        function filterPool(status, el) {
+            document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            renderPool(status);
+        }
+
+        function renderClerkOrders(filter = 'my-pending') {
+            const list = document.getElementById('my-orders-list');
+            list.innerHTML = '';
+            
+            const filtered = filter === 'my-pending' ? clerkOrders.filter(o => o.status === 'pending') : clerkOrders.filter(o => o.status !== 'pending');
+            
+            filtered.forEach(o => {
+                const card = document.createElement('div');
+                card.className = `order-card animate-fadeInUp`;
+                card.onclick = () => card.classList.toggle('expanded');
+                
+                const statusMap = {
+                    'pending': { text: '处理中', class: 'status-processing' },
+                    'completed': { text: '已完成', class: 'status-completed' }
+                };
+                const s = statusMap[o.status];
+
+                let timelineHtml = '<div class="timeline">';
+                o.history.forEach(h => {
+                    let evidenceHtml = h.evidence ? `<div class="timeline-evidence">${h.evidence.map(e => `<span class="evidence-tag">${e}</span>`).join('')}</div>` : '';
+                    timelineHtml += `
+                        <div class="timeline-item ${h.active ? 'active' : ''} ${h.completed ? 'completed' : ''}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-header">
+                                <span class="timeline-role">${h.role}</span>
+                                <span class="timeline-time">${h.time || ''}</span>
+                            </div>
+                            <div class="timeline-content">${h.content}${evidenceHtml}</div>
+                        </div>
+                    `;
+                });
+                timelineHtml += '</div>';
+
+                card.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">ID: ${o.id}</span>
+                        <span class="status-badge ${s.class}">${s.text}</span>
+                    </div>
+                    <div class="order-title">${o.point} · ${o.type}</div>
+                    <div class="order-meta">
+                        <span>🕒 ${o.time}</span>
+                        <span>📄 ${o.history.length} 条记录</span>
+                    </div>
+                    <div class="order-detail-panel">
+                        ${timelineHtml}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function switchMainTab(tabId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            
+            const targetNav = document.querySelector(`.nav-item[onclick*="${tabId}"]`);
+            if (targetNav) targetNav.classList.add('active');
+            
+            document.getElementById(tabId).classList.add('active');
+            
+            const titles = { 'pool': '售后工单池', 'my': '我的工单', 'profile': '个人中心' };
+            document.getElementById('pageTitle').innerText = titles[tabId];
+
+            if (tabId === 'my') renderClerkOrders();
+        }
+
+        function switchInnerTab(tabId) {
+            document.querySelectorAll('.inner-tab').forEach(el => el.classList.remove('active'));
+            const targetTab = document.querySelector(`.inner-tab[onclick*="${tabId}"]`);
+            if (targetTab) targetTab.classList.add('active');
+            
+            if (tabId.startsWith('my-')) {
+                renderClerkOrders(tabId);
+            }
+        }
+
+        function archive(id) {
+            showToast("✅ 归档成功");
+            document.getElementById(id).style.opacity = '0.3';
+            document.getElementById(id).style.pointerEvents = 'none';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+
+        // Init
+        renderPool();
+    </script>
+</body>
+</html>
