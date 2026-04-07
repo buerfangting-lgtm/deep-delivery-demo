@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>å¸æºæ§è¡ç«¯ (å¤ç»´å·¥ä½å°) â DeepDelivery</title>
+    <title>司机执行端 (多维工作台) — DeepDelivery</title>
     <link rel="stylesheet" href="styles/theme.css">
     <style>
         .driver-layout { display: flex; flex-direction: column; height: 100vh; background: var(--gray-950); overflow: hidden; }
@@ -173,12 +173,12 @@
     <div class="driver-layout">
         <header class="driver-header">
             <div class="header-left">
-                <span class="header-title" id="page-title">ééä»»å¡</span>
-                <span class="header-sub" id="page-subtitle">è·¯çº¿ï¼åè¥¿ä¸çº¿ (8/12 å·²å®æ)</span>
+                <span class="header-title" id="page-title">配送任务</span>
+                <span class="header-sub" id="page-subtitle">路线：城西专线 (8/12 已完成)</span>
             </div>
             <div class="header-right">
-                <a href="select.html" class="switch-btn">ð åæ¢è§è²</a>
-                <span class="header-badge">å¸æºç«¯</span>
+                <a href="select.html" class="switch-btn">🔄 切换角色</a>
+                <span class="header-badge">司机端</span>
             </div>
         </header>
 
@@ -187,85 +187,85 @@
             <section id="view-tasks" class="page-section active">
                 <div class="task-scroll">
                     <div id="section-active">
-                        <div class="section-label">â° æ­£å¨éé</div>
+                        <div class="section-label">⏰ 正在配送</div>
                         <div id="list-active">
-                            <div class="task-card active" id="card-äºä¸­">
+                            <div class="task-card active" id="card-二中">
                                 <div class="task-main">
                                     <div class="task-info">
-                                        <div class="task-name">æ¸©å·ç¬¬äºä¸­å­¦</div>
-                                        <div class="task-time"><span class="time-badge badge-strict">éæ¶ 06:45 å</span></div>
+                                        <div class="task-name">温州第二中学</div>
+                                        <div class="task-time"><span class="time-badge badge-strict">限时 06:45 前</span></div>
                                     </div>
-                                    <span class="status-tag tag-waiting">ééä¸­</span>
+                                    <span class="status-tag tag-waiting">配送中</span>
                                 </div>
                                 <div class="task-actions">
-                                    <button class="action-btn btn-voice" onclick="openVoice('card-äºä¸­')">ð¢ è¯­é³å½å¥ (å®å/å¨è½¬ç­)</button>
-                                    <button class="action-btn btn-deliver" onclick="confirmDeliver('card-äºä¸­')">ð ç¡®è®¤éè¾¾</button>
+                                    <button class="action-btn btn-voice" onclick="openVoice('card-二中')">📢 语音录入 (售后/周转筐)</button>
+                                    <button class="action-btn btn-deliver" onclick="confirmDeliver('card-二中')">🚚 确认送达</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div id="section-flex">
-                        <div class="section-label">ðï¸ èªç±éé</div>
+                        <div class="section-label">🗓️ 自由配送</div>
                         <div id="list-flex">
-                            <div class="task-card flex-active" id="card-å¸åº">
+                            <div class="task-card flex-active" id="card-市府">
                                 <div class="task-main">
                                     <div class="task-info">
-                                        <div class="task-name">å¸åºåé£å </div>
-                                        <div class="task-time"><span class="time-badge badge-flex">æ æ¶é´è¦æ±</span></div>
+                                        <div class="task-name">市府办食堂</div>
+                                        <div class="task-time"><span class="time-badge badge-flex">无时间要求</span></div>
                                     </div>
-                                    <span class="status-tag tag-waiting">å¾éé</span>
+                                    <span class="status-tag tag-waiting">待配送</span>
                                 </div>
                                 <div class="task-actions">
-                                    <button class="action-btn btn-voice" onclick="openVoice('card-å¸åº')">ð¢ è¯­é³å½å¥ (å®å/å¨è½¬ç­)</button>
-                                    <button class="action-btn btn-deliver" onclick="confirmDeliver('card-å¸åº')">ð ç¡®è®¤éè¾¾</button>
+                                    <button class="action-btn btn-voice" onclick="openVoice('card-市府')">📢 语音录入 (售后/周转筐)</button>
+                                    <button class="action-btn btn-deliver" onclick="confirmDeliver('card-市府')">🚚 确认送达</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div id="section-delivered">
-                        <div class="section-label">â ï¸ å·²éè¾¾ (å¾å½ç­)</div>
+                        <div class="section-label">⚠️ 已送达 (待录筐)</div>
                         <div id="list-delivered">
-                            <div class="task-card delivered" id="card-ä¸ä¸­">
+                            <div class="task-card delivered" id="card-三中">
                                 <div class="task-main">
                                     <div class="task-info">
-                                        <div class="task-name">æ¸©å·ç¬¬ä¸ä¸­å­¦</div>
-                                        <div class="task-time" style="color:var(--amber-500);">06:12 å·²ç¡®è®¤éè¾¾</div>
+                                        <div class="task-name">温州第三中学</div>
+                                        <div class="task-time" style="color:var(--amber-500);">06:12 已确认送达</div>
                                     </div>
-                                    <span class="status-tag tag-delivered">å¾è¡¥å½</span>
+                                    <span class="status-tag tag-delivered">待补录</span>
                                 </div>
-                                <div class="task-notif notif-warn">â ï¸ å°æªè®°å½å¨è½¬ç­åæ¶æ°é</div>
+                                <div class="task-notif notif-warn">⚠️ 尚未记录周转筐回收数量</div>
                                 <div class="task-actions">
-                                    <button class="action-btn btn-voice" style="background:var(--amber-600); color:white;" onclick="openVoice('card-ä¸ä¸­')">ð¢ è¯­é³å½å¥ (å®å/å¨è½¬ç­)</button>
+                                    <button class="action-btn btn-voice" style="background:var(--amber-600); color:white;" onclick="openVoice('card-三中')">📢 语音录入 (售后/周转筐)</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div id="section-closed">
-                        <div class="section-label">ð å·²ç»æ¡åå²</div>
+                        <div class="section-label">🏁 已结案历史</div>
                         <div id="list-closed">
-                            <div class="task-card closed" id="card-ä¸ä¸­">
+                            <div class="task-card closed" id="card-一中">
                                 <div class="task-main">
                                     <div class="task-info">
-                                        <div class="task-name">æ¸©å·ç¬¬ä¸ä¸­å­¦</div>
-                                        <div class="task-time" style="color:var(--gray-500);">05:30 ç»æ¡</div>
+                                        <div class="task-name">温州第一中学</div>
+                                        <div class="task-time" style="color:var(--gray-500);">05:30 结案</div>
                                     </div>
-                                    <span class="status-tag tag-closed">å·²ç»æ¡</span>
+                                    <span class="status-tag tag-closed">已结案</span>
                                 </div>
                                 <div class="task-summary">
                                     <div class="summary-row">
-                                        <span class="summary-label">ð¦ å¨è½¬ç­</span>
-                                        <div class="summary-val">ä»æ¥ 10/10 Â· ç»å­ <b style="color:var(--blue-400);">85</b></div>
+                                        <span class="summary-label">📦 周转筐</span>
+                                        <div class="summary-val">今日 10/10 · 结存 <b style="color:var(--blue-400);">85</b></div>
                                     </div>
                                     <div class="summary-row">
-                                        <span class="summary-label">ð¢ å®å</span>
-                                        <div class="summary-val">æ å¼å¸¸</div>
+                                        <span class="summary-label">📢 售后</span>
+                                        <div class="summary-val">无异常</div>
                                     </div>
                                 </div>
                                 <div class="task-actions">
-                                    <button class="action-btn btn-voice" onclick="openVoice('card-ä¸ä¸­')">ð¢ è¯­é³è¡¥æ¥</button>
+                                    <button class="action-btn btn-voice" onclick="openVoice('card-一中')">📢 语音补报</button>
                                 </div>
                             </div>
                         </div>
@@ -276,10 +276,10 @@
             <!-- SECTION 2: MY ORDERS -->
             <section id="view-orders" class="page-section">
                 <div class="order-tabs">
-                    <div class="order-tab active" onclick="switchOrderStatus('pending')">å¾å¤ç</div>
-                    <div class="order-tab" onclick="switchOrderStatus('processing')">å¤çä¸­</div>
-                    <div class="order-tab" onclick="switchOrderStatus('completed')">å·²å®æ</div>
-                    <div class="order-tab" onclick="switchOrderStatus('closed')">å·²å³é­</div>
+                    <div class="order-tab active" onclick="switchOrderStatus('pending')">待处理</div>
+                    <div class="order-tab" onclick="switchOrderStatus('processing')">处理中</div>
+                    <div class="order-tab" onclick="switchOrderStatus('completed')">已完成</div>
+                    <div class="order-tab" onclick="switchOrderStatus('closed')">已关闭</div>
                 </div>
                 
                 <div id="order-list-container">
@@ -288,45 +288,45 @@
                         <div class="order-card" onclick="toggleOrderExpand(this)">
                             <div class="order-header">
                                 <span class="order-id">#AS-9921</span>
-                                <span class="order-status status-pending">å¾ä¸åæ¢å</span>
+                                <span class="order-status status-pending">待专员抢单</span>
                             </div>
-                            <div class="order-content">å«©è±èç¢äºä¸¤æ¿ (æ¢è´§)</div>
+                            <div class="order-content">嫩豆腐碎了两板 (换货)</div>
                             <div class="order-meta">
-                                <span>æ¸©å·äºä¸­</span>
-                                <span>ååæäº¤</span>
+                                <span>温州二中</span>
+                                <span>刚刚提交</span>
                             </div>
                             <div class="order-details">
                                 <div class="detail-item">
-                                    <div class="detail-label">æ¥å¤è¯¦æ (è¯æ®)</div>
+                                    <div class="detail-label">报备详情 (证据)</div>
                                     <div class="evidence-box">
-                                        <div class="evidence-thumb">ð¸</div>
-                                        <div class="evidence-text">âå«©è±èç¢äºä¸¤æ¿ï¼åå¨ä¸é¢çé£æ¿å¨æ¯æµæ°´äºãè¿æ¹è±èåè´¨å¤ªå«©ï¼å®¹æç¢ãâ</div>
+                                        <div class="evidence-thumb">📸</div>
+                                        <div class="evidence-text">“嫩豆腐碎了两板，压在下面的那板全是浆水了。这批豆腐品质太嫩，容易碎。”</div>
                                     </div>
-                                    <div class="driver-requirement">ð å¸æºå®å±ï¼ä¸æ¬¡è®©éè´­æ¢ä¸å®¶èä¸ç¹çè±èã</div>
+                                    <div class="driver-requirement">📌 司机叮嘱：下次让采购换一家老一点的豆腐。</div>
                                 </div>
                                 <div class="detail-item">
-                                    <div class="detail-label">å¤çä¿¡æ¯</div>
+                                    <div class="detail-label">处理信息</div>
                                     <div class="specialist-box">
                                         <div class="spec-avatar">?</div>
                                         <div class="spec-info">
-                                            <div class="spec-name">ç­å¾åéä¸å</div>
-                                            <div class="spec-status">æ­£å¨å¹éæè¿ééå...</div>
+                                            <div class="spec-name">等待分配专员</div>
+                                            <div class="spec-status">正在匹配最近配送员...</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="order-actions">
-                                    <button class="btn-outline" onclick="event.stopPropagation(); editOrder('#AS-9921')">âï¸ ä¿®æ¹åå®¹</button>
-                                    <button class="btn-outline danger" onclick="event.stopPropagation(); withdrawOrder(this, '#AS-9921')">â©ï¸ æ¤åå·¥å</button>
+                                    <button class="btn-outline" onclick="event.stopPropagation(); editOrder('#AS-9921')">✏️ 修改内容</button>
+                                    <button class="btn-outline danger" onclick="event.stopPropagation(); withdrawOrder(this, '#AS-9921')">↩️ 撤回工单</button>
                                 </div>
                                 <div class="detail-item" style="margin-top:20px;">
-                                    <div class="detail-label">è¿åº¦è¿½è¸ª</div>
+                                    <div class="detail-label">进度追踪</div>
                                     <div class="order-timeline">
                                         <div class="timeline-step active">
-                                            <div class="step-title">å¸æºæäº¤å¼å¸¸</div>
+                                            <div class="step-title">司机提交异常</div>
                                             <div class="step-time">08:10</div>
                                         </div>
                                         <div class="timeline-step">
-                                            <div class="step-title">ç³»ç»å·²ååå·¥å</div>
+                                            <div class="step-title">系统已分发工单</div>
                                             <div class="step-time">08:11</div>
                                         </div>
                                     </div>
@@ -339,40 +339,40 @@
                         <div class="order-card" onclick="toggleOrderExpand(this)">
                             <div class="order-header">
                                 <span class="order-id">#AS-8812</span>
-                                <span class="order-status status-processing">ä¸åééä¸­</span>
+                                <span class="order-status status-processing">专员配送中</span>
                             </div>
-                            <div class="order-content">ç¼ºå¤± 10æ¤ å¨å¨è (è¡¥è´§)</div>
+                            <div class="order-content">缺失 10斤 娃娃菜 (补货)</div>
                             <div class="order-meta">
-                                <span>å®éªå°å­¦</span>
-                                <span>ä¸åï¼å¼ å¸å</span>
+                                <span>实验小学</span>
+                                <span>专员：张师傅</span>
                             </div>
                             <div class="order-details">
                                 <div class="detail-item">
-                                    <div class="detail-label">æ¥å¤è¯¦æ (è¯æ®)</div>
+                                    <div class="detail-label">报备详情 (证据)</div>
                                     <div class="evidence-box">
-                                        <div class="evidence-thumb">ð¦</div>
-                                        <div class="evidence-text">âå¨å¨èç¼ºäºä¸ç­ï¼åå­ä¸æ30æ¤ï¼å®æ¶åªæ20æ¤ãè¯·å°½å¿«è¡¥é½ï¼ä¸ç¶é£å ä¸­åæ²¡èçãâ</div>
+                                        <div class="evidence-thumb">📦</div>
+                                        <div class="evidence-text">“娃娃菜缺了一筐，单子上有30斤，实收只有20斤。请尽快补齐，不然食堂中午没菜炒。”</div>
                                     </div>
                                 </div>
                                 <div class="detail-item">
-                                    <div class="detail-label">å¤çäººä¿¡æ¯</div>
+                                    <div class="detail-label">处理人信息</div>
                                     <div class="specialist-box">
-                                        <div class="spec-avatar">å¼ </div>
+                                        <div class="spec-avatar">张</div>
                                         <div class="spec-info">
-                                            <div class="spec-name">å¼ å¸å</div>
-                                            <div class="spec-status">æ­£å¨åå¾å¸åºå¤è´­ä¸­...</div>
+                                            <div class="spec-name">张师傅</div>
+                                            <div class="spec-status">正在前往市场外购中...</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="detail-item">
-                                    <div class="detail-label">è¿åº¦è¿½è¸ª</div>
+                                    <div class="detail-label">进度追踪</div>
                                     <div class="order-timeline">
                                         <div class="timeline-step active">
-                                            <div class="step-title">ä¸åå·²æ¥å</div>
+                                            <div class="step-title">专员已接单</div>
                                             <div class="step-time">07:50</div>
                                         </div>
                                         <div class="timeline-step active">
-                                            <div class="step-title">æ­£å¨éè´­/éé</div>
+                                            <div class="step-title">正在采购/配送</div>
                                             <div class="step-time">08:05</div>
                                         </div>
                                     </div>
@@ -385,26 +385,26 @@
                         <div class="order-card" onclick="toggleOrderExpand(this)">
                             <div class="order-header">
                                 <span class="order-id">#AS-7705</span>
-                                <span class="order-status status-completed">å·²å®æ</span>
+                                <span class="order-status status-completed">已完成</span>
                             </div>
-                            <div class="order-content">éæ¤æ¥æ 2kg (å·²å¹³è´¦)</div>
+                            <div class="order-content">青椒报损 2kg (已平账)</div>
                             <div class="order-meta">
-                                <span>åç«éé¤</span>
-                                <span>09:20 å®æ</span>
+                                <span>南站配餐</span>
+                                <span>09:20 完成</span>
                             </div>
                             <div class="order-details">
                                 <div class="detail-item">
-                                    <div class="detail-label">åå§æ¥å¤ (è¯æ®)</div>
+                                    <div class="detail-label">原始报备 (证据)</div>
                                     <div class="evidence-box">
-                                        <div class="evidence-thumb">ð¶ï¸</div>
-                                        <div class="evidence-text">âéæ¤åè´¨ä¸å¥½ï¼å¾å¤é½çäºãé£å å¨å¸ä¸æ»¡æï¼è¦æ±éå 2kgï¼è¯´ä¸æ¬¡ä¸è¦è¿ç§è´§ãâ</div>
+                                        <div class="evidence-thumb">🌶️</div>
+                                        <div class="evidence-text">“青椒品质不好，很多都焉了。食堂厨师不满意，要求退回 2kg，说下次不要这种货。”</div>
                                     </div>
-                                    <div class="driver-requirement">ð å¸æºå®å±ï¼éè´­è¦è·ä¾åºåæå£°æå¼ï¼è¿ç§è´§ä¸æ¬¡ä¸è½è¦ã</div>
+                                    <div class="driver-requirement">📌 司机叮嘱：采购要跟供应商打声招呼，这种货下次不能要。</div>
                                 </div>
                                 <div class="detail-item">
-                                    <div class="detail-label">å¤çç»è®º</div>
+                                    <div class="detail-label">处理结论</div>
                                     <div style="font-size:12px; color:var(--gray-300); background:rgba(16,185,129,0.05); padding:10px; border-radius:8px; border:1px solid rgba(16,185,129,0.1);">
-                                        ä¸åå®å°æ ¸å®ï¼ç¡®å®å­å¨èè«ï¼å·²æç§æ¥ææµç¨å¨åæ¹ ERP æ£é¤éé¢ã
+                                        专员实地核实，确实存在萎蔫，已按照报损流程在后方 ERP 扣除金额。
                                     </div>
                                 </div>
                             </div>
@@ -415,18 +415,18 @@
                         <div class="order-card" onclick="toggleOrderExpand(this)">
                             <div class="order-header">
                                 <span class="order-id">#AS-6601</span>
-                                <span class="order-status status-closed">å·²æ¤é</span>
+                                <span class="order-status status-closed">已撤销</span>
                             </div>
-                            <div class="order-content">è¯¯æ¥ï¼åè±æ°éæ­£å¸¸</div>
+                            <div class="order-content">误报：土豆数量正常</div>
                             <div class="order-meta">
-                                <span>æ¸©å·ä¸ä¸­</span>
-                                <span>å¸æºæ¤å</span>
+                                <span>温州三中</span>
+                                <span>司机撤回</span>
                             </div>
                             <div class="order-details">
                                 <div class="detail-item">
-                                    <div class="detail-label">å³é­åå </div>
+                                    <div class="detail-label">关闭原因</div>
                                     <div style="font-size:12px; color:var(--gray-500);">
-                                        å¸æºå¨æäº¤å 3 åéåèªè¡æ¤åï¼è®¤ä¸ºæ°æ®æ ¸å¯¹æè¯¯ï¼æ éä¸åä»å¥ã
+                                        司机在提交后 3 分钟内自行撤回，认为数据核对有误，无需专员介入。
                                     </div>
                                 </div>
                             </div>
@@ -438,46 +438,46 @@
             <!-- SECTION 3: PROFILE -->
             <section id="view-profile" class="page-section">
                 <div class="profile-hero">
-                    <div class="avatar">é</div>
-                    <div class="profile-name">éå¤§å</div>
-                    <div class="profile-role">éçå¸æº Â· åè¥¿çº¿è·¯è´è´£äºº</div>
+                    <div class="avatar">陈</div>
+                    <div class="profile-name">陈大勇</div>
+                    <div class="profile-role">金牌司机 · 城西线路负责人</div>
                 </div>
                 <div class="profile-stats">
                     <div class="stat-item">
                         <div class="stat-val">28</div>
-                        <div class="stat-label">ä»æ¥åæ°</div>
+                        <div class="stat-label">今日单数</div>
                     </div>
                     <div class="stat-item" onclick="toggleCrateHistory()">
                         <div class="stat-val">102</div>
-                        <div class="stat-label">å¨è½¬ç­ç»å­ ð</div>
+                        <div class="stat-label">周转筐结存 📊</div>
                     </div>
                 </div>
 
                 <div class="crate-history-card" id="crate-history">
                     <div class="order-tabs" style="margin: 0 0 16px; background: rgba(0,0,0,0.2);">
-                        <div class="order-tab active" id="tab-crate-weekly" onclick="switchCrateSubView('weekly')">æ¬å¨è¶å¿</div>
-                        <div class="order-tab" id="tab-crate-points" onclick="switchCrateSubView('points')">ç¹ä½æ¸å</div>
+                        <div class="order-tab active" id="tab-crate-weekly" onclick="switchCrateSubView('weekly')">本周趋势</div>
+                        <div class="order-tab" id="tab-crate-points" onclick="switchCrateSubView('points')">点位清单</div>
                     </div>
 
                     <!-- Subview: Weekly -->
                     <div id="crate-sub-weekly">
                         <div style="font-size:12px; font-weight:900; color:var(--white); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>æ¬å¨åå¨è¶å¿</span>
-                            <span style="font-size:10px; color:var(--gray-600); font-weight:600;">æ»ç»å­ï¼102</span>
+                            <span>本周变动趋势</span>
+                            <span style="font-size:10px; color:var(--gray-600); font-weight:600;">总结存：102</span>
                         </div>
                         <table class="crate-table">
                             <thead>
                                 <tr>
-                                    <th>æ¥æ</th>
-                                    <th>çä¸</th>
-                                    <th>æ¶å</th>
-                                    <th>ç»å­</th>
+                                    <th>日期</th>
+                                    <th>留下</th>
+                                    <th>收回</th>
+                                    <th>结存</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td class="date">04/07 (äº)</td><td class="diff-plus">+12</td><td class="diff-minus">-10</td><td class="balance">102</td></tr>
-                                <tr><td class="date">04/06 (ä¸)</td><td class="diff-plus">+15</td><td class="diff-minus">-15</td><td class="balance">100</td></tr>
-                                <tr><td class="date">04/05 (æ¥)</td><td class="diff-plus">+8</td><td class="diff-minus">-8</td><td class="balance">100</td></tr>
+                                <tr><td class="date">04/07 (二)</td><td class="diff-plus">+12</td><td class="diff-minus">-10</td><td class="balance">102</td></tr>
+                                <tr><td class="date">04/06 (一)</td><td class="diff-plus">+15</td><td class="diff-minus">-15</td><td class="balance">100</td></tr>
+                                <tr><td class="date">04/05 (日)</td><td class="diff-plus">+8</td><td class="diff-minus">-8</td><td class="balance">100</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -485,55 +485,55 @@
                     <!-- Subview: Points Breakdown -->
                     <div id="crate-sub-points" style="display:none;">
                         <div style="font-size:12px; font-weight:900; color:var(--white); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>æ¬å¨ç¹ä½ç´¯è®¡ (è³å¨äºééç»æ)</span>
-                            <span style="font-size:10px; color:var(--amber-500);">ð å¨äºä¸åç»ä¸æ¸ç®</span>
+                            <span>本周点位累计 (至周五配送结束)</span>
+                            <span style="font-size:10px; color:var(--amber-500);">📅 周五下午统一清算</span>
                         </div>
                         <div class="crate-detail-list">
                             <div class="crate-detail-item">
                                 <div class="crate-point-info">
-                                    <div class="crate-point-name">æ¸©å·ç¬¬ä¸ä¸­å­¦</div>
-                                    <div class="crate-point-calc">æ¬å¨ç´¯è®¡ï¼ç 85 / æ¶ 0</div>
+                                    <div class="crate-point-name">温州第一中学</div>
+                                    <div class="crate-point-calc">本周累计：留 85 / 收 0</div>
                                 </div>
                                 <div class="crate-point-balance">85</div>
                             </div>
                             <div class="crate-detail-item">
                                 <div class="crate-point-info">
-                                    <div class="crate-point-name">æ¸©å·ç¬¬äºä¸­å­¦</div>
-                                    <div class="crate-point-calc">æ¬å¨ç´¯è®¡ï¼ç 12 / æ¶ 0</div>
+                                    <div class="crate-point-name">温州第二中学</div>
+                                    <div class="crate-point-calc">本周累计：留 12 / 收 0</div>
                                 </div>
                                 <div class="crate-point-balance">12</div>
                             </div>
                             <div class="crate-detail-item">
-                                <div class="crate-point-name">å¸åºåé£å </div>
-                                <div class="crate-point-calc">æ¬å¨ç´¯è®¡ï¼ç 5 / æ¶ 0</div>
+                                <div class="crate-point-name">市府办食堂</div>
+                                <div class="crate-point-calc">本周累计：留 5 / 收 0</div>
                             </div>
                         </div>
                         <div style="margin-top:16px; padding:12px; background:rgba(245,158,11,0.05); border-radius:8px; border:1px solid rgba(245,158,11,0.1);">
                             <div style="font-size:11px; color:var(--amber-500); font-weight:800; line-height:1.4;">
-                                ð¡ æç¤ºï¼æ¬å¨æ°æ®ç»è®¡è³å¨äºæ©æ¨ééå®ä¸ºæ­¢ï¼ä¸åå°ç±ä¸åè¿è¡å¨éåæ¶æ ¸éãè¯·ç¡®ä¿æ¯æ¥ééæ¶åç¡®å½å¥ç/æ¶æ°éã
+                                💡 提示：本周数据统计至周五早晨配送完为止，下午将由专员进行全量回收核销。请确保每日配送时准确录入留/收数量。
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div style="margin: 0 20px;">
-                    <button class="action-btn" style="background:var(--gray-800); color:var(--red-500); width:100%;" onclick="location.href='select.html'">éåºç»å½</button>
+                    <button class="action-btn" style="background:var(--gray-800); color:var(--red-500); width:100%;" onclick="location.href='select.html'">退出登录</button>
                 </div>
             </section>
         </main>
 
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchView('tasks')">
-                <span class="nav-icon">ð</span>
-                <span class="nav-label">ééä»»å¡</span>
+                <span class="nav-icon">🚚</span>
+                <span class="nav-label">配送任务</span>
             </div>
             <div class="nav-item" onclick="switchView('orders')">
-                <span class="nav-icon">ð</span>
-                <span class="nav-label">æçå·¥å</span>
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">我的工单</span>
             </div>
             <div class="nav-item" onclick="switchView('profile')">
-                <span class="nav-icon">ð¤</span>
-                <span class="nav-label">ä¸ªäººä¸­å¿</span>
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">个人中心</span>
             </div>
         </nav>
 
@@ -542,37 +542,37 @@
             <div style="background:var(--red-600); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 0 40px rgba(239,68,68,0.4);">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
             </div>
-            <div id="voiceTitle" style="font-size:18px; font-weight:900; color:white;">æ­£å¨å¬å...</div>
-            <div style="margin-top:20px; font-size:14px; color:var(--gray-500); text-align:center;">å»ºè®®è¾å¥ï¼<br>âè±èç¢äºä¸¤æ¿ï¼å½12ä¸ªç­ï¼å10ä¸ªãâ</div>
-            <button class="action-btn btn-deliver" style="margin-top:40px; width:200px;" onclick="processVoice()">å½å¶ç»æ</button>
+            <div id="voiceTitle" style="font-size:18px; font-weight:900; color:white;">正在听取...</div>
+            <div style="margin-top:20px; font-size:14px; color:var(--gray-500); text-align:center;">建议输入：<br>“豆腐碎了两板，录12个筐，回10个。”</div>
+            <button class="action-btn btn-deliver" style="margin-top:40px; width:200px;" onclick="processVoice()">录制结束</button>
         </div>
 
         <div class="modal-sheet" id="reportSheet">
             <div style="width:40px; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin:-12px auto 20px;"></div>
-            <div style="font-size:18px; font-weight:900; margin-bottom:20px;">ð§  AI è¯å«æ°æ®ç¡®è®¤</div>
+            <div style="font-size:18px; font-weight:900; margin-bottom:20px;">🧠 AI 识别数据确认</div>
             <div id="ai-issue-block" style="background:rgba(255,255,255,0.03); border-radius:12px; padding:16px; margin-bottom:12px;">
-                <div id="issue-label" style="font-size:11px; color:var(--red-500); font-weight:900; margin-bottom:8px;">â ï¸ å¼å¸¸æ¥å¤</div>
-                <div id="issue-content" style="font-size:14px; font-weight:800; color:var(--white); line-height:1.4;">å«©è±èç¢äºä¸¤æ¿ (æ¢è´§éæ±)</div>
+                <div id="issue-label" style="font-size:11px; color:var(--red-500); font-weight:900; margin-bottom:8px;">⚠️ 异常报备</div>
+                <div id="issue-content" style="font-size:14px; font-weight:800; color:var(--white); line-height:1.4;">嫩豆腐碎了两板 (换货需求)</div>
                 <div id="photo-block" class="photo-area" onclick="takePhoto()">
-                    <span id="photo-icon" style="font-size:20px;">ð¸</span><br>
-                    <span id="photo-text" style="font-size:12px; color:var(--gray-500); font-weight:800; margin-top:8px; display:block;">ç¹å»ææè¯æ® (å¿å¡«)</span>
+                    <span id="photo-icon" style="font-size:20px;">📸</span><br>
+                    <span id="photo-text" style="font-size:12px; color:var(--gray-500); font-weight:800; margin-top:8px; display:block;">点击拍摄证据 (必填)</span>
                 </div>
             </div>
             <div id="ai-crate-block" style="background:rgba(255,255,255,0.03); border-radius:12px; padding:16px;">
-                <div id="crate-label" style="font-size:11px; color:var(--blue-400); font-weight:900; margin-bottom:8px;">ð¦ å¨è½¬ç­è´¦ç®</div>
+                <div id="crate-label" style="font-size:11px; color:var(--blue-400); font-weight:900; margin-bottom:8px;">📦 周转筐账目</div>
                 <div class="calc-grid">
-                    <div class="calc-box"><div class="calc-label">æ¨æ¥</div><div class="calc-val">100</div></div>
+                    <div class="calc-box"><div class="calc-label">昨日</div><div class="calc-val">100</div></div>
                     <div class="calc-symbol">+</div>
-                    <div class="calc-box"><div class="calc-label">çä¸</div><div class="calc-val">12</div></div>
+                    <div class="calc-box"><div class="calc-label">留下</div><div class="calc-val">12</div></div>
                     <div class="calc-symbol">-</div>
-                    <div class="calc-box"><div class="calc-label">æ¶å</div><div class="calc-val">10</div></div>
+                    <div class="calc-box"><div class="calc-label">收回</div><div class="calc-val">10</div></div>
                 </div>
             </div>
-            <button id="submit-btn" class="action-btn btn-deliver" style="width:100%; margin-top:24px; padding:16px;" onclick="closeReport()">ç¡®è®¤æ è¯¯å¹¶æäº¤</button>
+            <button id="submit-btn" class="action-btn btn-deliver" style="width:100%; margin-top:24px; padding:16px;" onclick="closeReport()">确认无误并提交</button>
         </div>
     </div>
 
-    <div class="toast" id="toast">â æä½æå</div>
+    <div class="toast" id="toast">✅ 操作成功</div>
 
     <script>
         let currentCardId = null;
@@ -586,8 +586,8 @@
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             document.querySelector(`[onclick="switchView('${viewId}')"]`).classList.add('active');
 
-            const titles = { 'tasks': 'ééä»»å¡', 'orders': 'æçå·¥å', 'profile': 'ä¸ªäººä¸­å¿' };
-            const subs = { 'tasks': 'è·¯çº¿ï¼åè¥¿ä¸çº¿ (8/12 å·²å®æ)', 'orders': 'å®åå¼å¸¸è·è¿', 'profile': 'è´¦å·ä¸ç»è®¡' };
+            const titles = { 'tasks': '配送任务', 'orders': '我的工单', 'profile': '个人中心' };
+            const subs = { 'tasks': '路线：城西专线 (8/12 已完成)', 'orders': '售后异常跟进', 'profile': '账号与统计' };
             document.getElementById('page-title').innerText = titles[viewId];
             document.getElementById('page-subtitle').innerText = subs[viewId];
         }
@@ -612,20 +612,20 @@
         }
 
         function editOrder(orderId) {
-            showToast("âï¸ è¯·éæ°éè¿è¯­é³æè¿°ä¿®æ¹åå®¹");
+            showToast("✏️ 请重新通过语音描述修改内容");
             // Simulate opening voice for the current order in context
             setTimeout(() => {
-                document.getElementById('voiceTitle').innerText = "ä¿®æ¹å·¥åï¼" + orderId;
+                document.getElementById('voiceTitle').innerText = "修改工单：" + orderId;
                 document.getElementById('voiceOverlay').style.display = 'flex';
             }, 500);
         }
 
         function withdrawOrder(btn, orderId) {
-            if (!confirm("ç¡®å®è¦æ¤åè¿ä¸ªå·¥ååï¼")) return;
+            if (!confirm("确定要撤回这个工单吗？")) return;
             
             const card = btn.closest('.order-card');
             card.querySelector('.order-status').className = "order-status status-closed";
-            card.querySelector('.order-status').innerText = "å·²æ¤é";
+            card.querySelector('.order-status').innerText = "已撤销";
             
             // Hide details before moving
             card.querySelector('.order-details').style.display = 'none';
@@ -633,7 +633,7 @@
             
             // Move to Closed list
             document.getElementById('state-closed').prepend(card);
-            showToast("â©ï¸ å·¥åå·²æ¤å");
+            showToast("↩️ 工单已撤回");
             
             // Auto switch to Closed tab to see result
             setTimeout(() => switchOrderStatus('closed'), 1000);
@@ -663,20 +663,20 @@
             isPhotoTaken = false;
             const pb = document.getElementById('photo-block');
             pb.classList.remove('captured');
-            document.getElementById('photo-icon').innerText = "ð¸";
-            document.getElementById('photo-text').innerText = "ç¹å»ææè¯æ® (å¿å¡«)";
+            document.getElementById('photo-icon').innerText = "📸";
+            document.getElementById('photo-text').innerText = "点击拍摄证据 (必填)";
             const name = document.getElementById(id).querySelector('.task-name').innerText;
-            document.getElementById('voiceTitle').innerText = "æ­£å¨å¬åï¼" + name;
+            document.getElementById('voiceTitle').innerText = "正在听取：" + name;
             document.getElementById('voiceOverlay').style.display = 'flex';
         }
 
         function takePhoto() {
             const pb = document.getElementById('photo-block');
             pb.classList.add('captured');
-            document.getElementById('photo-icon').innerText = "â";
-            document.getElementById('photo-text').innerText = "ç§çå·²ä¿å­";
+            document.getElementById('photo-icon').innerText = "✅";
+            document.getElementById('photo-text').innerText = "照片已保存";
             isPhotoTaken = true;
-            showToast("ð¸ æç§æå");
+            showToast("📸 拍照成功");
         }
 
         function processVoice() {
@@ -687,13 +687,13 @@
             
             if (isClosed) {
                 document.getElementById('ai-issue-block').style.display = 'block';
-                document.getElementById('issue-label').innerText = "ð¢ å®åè¡¥æ¥";
-                document.getElementById('issue-content').innerText = name + "è¡¥æ¥å¼å¸¸ï¼åé¦ç½èåºé¨åè´¨";
+                document.getElementById('issue-label').innerText = "📢 售后补报";
+                document.getElementById('issue-content').innerText = name + "补报异常：反馈白菜底部变质";
                 document.getElementById('ai-crate-block').style.opacity = '0.5';
             } else {
                 document.getElementById('ai-issue-block').style.display = 'block';
-                document.getElementById('issue-label').innerText = "â ï¸ å¼å¸¸æ¥å¤";
-                document.getElementById('issue-content').innerText = name + "ï¼è±èç¢äºä¸¤æ¿ (æ¢è´§éæ±)";
+                document.getElementById('issue-label').innerText = "⚠️ 异常报备";
+                document.getElementById('issue-content').innerText = name + "：豆腐碎了两板 (换货需求)";
                 document.getElementById('ai-crate-block').style.opacity = '1';
             }
             document.getElementById('reportSheet').style.display = 'block';
@@ -705,7 +705,7 @@
             const issueContent = document.getElementById('issue-content').innerText;
 
             if (document.getElementById('ai-issue-block').style.display !== 'none' && !isPhotoTaken) {
-                alert("è¯·åç¹å»ææå¼å¸¸å¾çè¯æ®ï¼"); return;
+                alert("请先点击拍摄异常图片证据！"); return;
             }
 
             document.getElementById('reportSheet').style.display = 'none';
@@ -714,11 +714,11 @@
                 const summary = card.querySelector('.task-summary');
                 const issueRow = summary.querySelectorAll('.summary-row')[1];
                 const val = issueRow.querySelector('.summary-val');
-                val.innerHTML += `<br><span class="issue">${issueContent} <span class="summary-photo-tag">ð·</span></span>`;
-                showToast("â å®åè¡¥æ¥æå");
+                val.innerHTML += `<br><span class="issue">${issueContent} <span class="summary-photo-tag">📷</span></span>`;
+                showToast("✅ 售后补报成功");
             } else if (card.classList.contains('delivered')) {
                 card.className = "task-card closed";
-                card.querySelector('.status-tag').innerText = "å·²ç»æ¡";
+                card.querySelector('.status-tag').innerText = "已结案";
                 card.querySelector('.status-tag').className = "status-tag tag-closed";
                 if (card.querySelector('.notif-warn')) card.querySelector('.notif-warn').remove();
                 
@@ -726,46 +726,46 @@
                 summary.className = "task-summary";
                 
                 // Determine point-specific simulated balance
-                let pointBal = (currentCardId === 'card-äºä¸­') ? "12" : (currentCardId === 'card-å¸åº' ? "5" : "10");
+                let pointBal = (currentCardId === 'card-二中') ? "12" : (currentCardId === 'card-市府' ? "5" : "10");
                 
                 summary.innerHTML = `
                     <div class="summary-row">
-                        <span class="summary-label">ð¦ å¨è½¬ç­</span>
-                        <div class="summary-val">ä»æ¥ 12/10 Â· ç»å­ <b style="color:var(--blue-400);">${pointBal}</b></div>
+                        <span class="summary-label">📦 周转筐</span>
+                        <div class="summary-val">今日 12/10 · 结存 <b style="color:var(--blue-400);">${pointBal}</b></div>
                     </div>
                     <div class="summary-row">
-                        <span class="summary-label">ð¢ å®å</span>
-                        <div class="summary-val"><span class="issue">${issueContent} <span class="summary-photo-tag">ð·</span></span></div>
+                        <span class="summary-label">📢 售后</span>
+                        <div class="summary-val"><span class="issue">${issueContent} <span class="summary-photo-tag">📷</span></span></div>
                     </div>
                 `;
                 card.querySelector('.task-main').after(summary);
-                card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" onclick="openVoice('${currentCardId}')">ð¢ è¯­é³è¡¥æ¥</button>`;
+                card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" onclick="openVoice('${currentCardId}')">📢 语音补报</button>`;
                 document.getElementById('list-closed').prepend(card);
-                showToast("â ç»æ¡æå");
+                showToast("✅ 结案成功");
             } else {
                 if (!card.querySelector('.notif-crate')) {
                     const badge = document.createElement('div');
                     badge.className = "task-notif notif-crate";
-                    badge.innerText = "ð¦ å·²å½ç­æ°ï¼ç12/æ¶10";
+                    badge.innerText = "📦 已录筐数：留12/收10";
                     card.querySelector('.task-main').after(badge);
                 }
-                showToast("â å½å¥æå");
+                showToast("✅ 录入成功");
             }
         }
 
         function confirmDeliver(id) {
             const card = document.getElementById(id);
             card.className = "task-card delivered";
-            card.querySelector('.status-tag').innerText = "å¾è¡¥å½";
+            card.querySelector('.status-tag').innerText = "待补录";
             card.querySelector('.status-tag').className = "status-tag tag-delivered";
-            card.querySelector('.task-time').innerText = "ååç¡®è®¤éè¾¾";
+            card.querySelector('.task-time').innerText = "刚刚确认送达";
             const warn = document.createElement('div');
             warn.className = "task-notif notif-warn";
-            warn.innerText = "â ï¸ å°æªè®°å½å¨è½¬ç­åæ¶æ°é";
+            warn.innerText = "⚠️ 尚未记录周转筐回收数量";
             card.querySelector('.task-main').after(warn);
-            card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" style="background:var(--amber-600); color:white;" onclick="openVoice('${id}')">ð¢ è¯­é³å½å¥ (å®å/å¨è½¬ç­)</button>`;
+            card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" style="background:var(--amber-600); color:white;" onclick="openVoice('${id}')">📢 语音录入 (售后/周转筐)</button>`;
             document.getElementById('list-delivered').appendChild(card);
-            showToast("ð ç¶ææ´æ°æå");
+            showToast("🚚 状态更新成功");
         }
 
         function showToast(msg) {
