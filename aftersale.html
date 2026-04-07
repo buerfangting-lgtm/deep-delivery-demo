@@ -63,107 +63,105 @@
         .order-main { padding: 18px; display: flex; align-items: center; gap: 16px; position: relative; z-index: 2; }
         .order-priority-bar { width: 4px; height: 48px; border-radius: 2px; flex-shrink: 0; }
         .bar-urgent { background: var(--rose-500); box-shadow: 0 0 10px rgba(244, 63, 94, 0.5); }
-        .bar-normal { background: var(--amber-500); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
-        .bar-low { background: var(--gray-500); }
+        .bar-normal { background: var(--blue-500); }
 
         .order-info { flex: 1; }
-        .order-title { font-size: 17px; font-weight: 800; color: var(--white); letter-spacing: -0.2px; }
-        .order-meta { font-size: 12px; color: var(--gray-500); margin-top: 6px; display: flex; gap: 10px; align-items: center; font-weight: 600; }
-
-        .pickup-btn { background: var(--blue-600); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+        .order-title { font-size: 17px; font-weight: 800; color: var(--white); }
+        .order-meta { font-size: 12px; color: var(--gray-500); margin-top: 4px; font-weight: 700; }
         
-        /* Expandable Area */
-        .order-detail { 
-            max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(255,255,255,0.01); border-top: 1px solid transparent;
-        }
-        .order-card.expanded .order-detail { max-height: 500px; border-top-color: var(--glass-border); }
-        .detail-inner { padding: 18px; }
+        .tag-status { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: var(--radius-full); text-transform: uppercase; }
+        .tag-pool { background: rgba(37,99,235,0.15); color: var(--blue-400); }
+        .tag-done { background: rgba(34, 197, 94, 0.15); color: var(--green-400); }
+
+        /* Detail Sheet (Expand) */
+        .detail-panel { display: none; padding: 0 18px 18px; animation: fadeIn 0.3s ease; }
+        .order-card.expanded .detail-panel { display: block; }
+        .detail-title { font-size: 11px; font-weight: 900; color: var(--gray-600); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .detail-content { font-size: 14px; color: var(--gray-300); line-height: 1.6; font-weight: 600; margin-bottom: 16px; }
         
-        .timeline { position: relative; padding-left: 20px; }
-        .timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--glass-border); }
-        .timeline-item { position: relative; margin-bottom: 20px; }
-        .timeline-dot { position: absolute; left: -20px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--gray-700); border: 2px solid var(--gray-900); }
-        .timeline-item.active .timeline-dot { background: var(--blue-500); box-shadow: 0 0 8px var(--blue-500); }
-        .timeline-content { font-size: 13px; color: var(--gray-300); font-weight: 600; }
-        .timeline-time { font-size: 10px; color: var(--gray-600); margin-top: 4px; }
+        .evidence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+        .evidence-img { aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 72px;
-            background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border); display: flex; z-index: 1000;
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--gray-600); cursor: pointer; }
-        .nav-item.active { color: var(--blue-400); }
-        .nav-icon { font-size: 20px; }
-        .nav-label { font-size: 10px; font-weight: 800; }
+        .action-btns { display: flex; gap: 10px; }
+        .btn-pickup { flex: 2; background: var(--blue-600); color: white; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 13px; border: none; box-shadow: var(--glow-blue); }
+        .btn-ignore { flex: 1; background: var(--glass-bg); color: var(--gray-400); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; font-weight: 900; font-size: 13px; }
 
-        .tag-status { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
-        .tag-todo { background: rgba(37,99,235,0.1); color: var(--blue-400); }
-        .tag-done { background: rgba(34, 197, 94, 0.1); color: var(--green-400); }
-
-        .toast {
-            position: fixed; top: 40px; left: 50%; transform: translateX(-50%);
-            background: var(--blue-600); color: white; padding: 12px 24px;
-            border-radius: 99px; font-weight: 900; font-size: 14px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); z-index: 5000; display: none;
-        }
-        .toast.show { display: block; animation: fadeInUp 0.3s forwards; }
+        .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: var(--green-600); color: white; padding: 12px 24px; border-radius: 40px; font-weight: 900; font-size: 14px; z-index: 5000; box-shadow: var(--shadow-xl); opacity: 0; pointer-events: none; transition: all 0.3s; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
     </style>
 </head>
 <body>
     <div class="page-layout">
         <header class="page-header">
             <div class="page-header-left">
-                <span class="page-title">售后工单</span>
+                <span class="page-title" id="pageTitle">售后工单</span>
             </div>
             <div class="page-header-right">
-                <a href="select.html" style="text-decoration: none; font-size: 12px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; color: var(--gray-400); font-weight: 800; border: 1px solid var(--glass-border);">🔄 切换</a>
-                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--blue-600); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px;">AS</div>
+                <a href="select.html" class="switch-btn">🔄 切换角色</a>
+                <span class="header-badge">售后专员 · 小李</span>
             </div>
         </header>
 
         <!-- Navigation Tab: 工单池 -->
         <div id="pool" class="tab-content active">
             <div class="stats-bar">
-                <div class="stat-pill urgent"><span class="num">3</span> 待处理</div>
-                <div class="stat-pill"><span class="num">12</span> 今日已完成</div>
-                <div class="stat-pill"><span class="num">¥240</span> 垫付金额</div>
+                <div class="stat-pill urgent">
+                    <span class="num">3</span>
+                    <span>加急处理</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="num">12</span>
+                    <span>待分配</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="num">98%</span>
+                    <span>今日时效</span>
+                </div>
             </div>
 
             <div class="order-scroll">
-                <div class="section-label">🔴 紧急处理 (1)</div>
-                <div class="order-card">
+                <div class="section-label">🔴 紧急工单</div>
+                <div class="order-card expandable" onclick="toggleExpand(this)">
                     <div class="order-main">
                         <div class="order-priority-bar bar-urgent"></div>
                         <div class="order-info">
-                            <div class="order-title">温州二中 · 豆腐损毁</div>
-                            <div class="order-meta"><span>上报 10min 前</span><span>张师傅上报</span></div>
+                            <div class="order-title">温州二中 · 豆腐 · 换货</div>
+                            <div class="order-meta">张师傅上报 · 刚刚</div>
                         </div>
-                        <button class="pickup-btn" onclick="pickupOrder('温州二中')">抢单</button>
+                        <span class="tag-status tag-pool">待抢单</span>
+                    </div>
+                    <div class="detail-panel">
+                        <div class="detail-title">问题描述</div>
+                        <div class="detail-content">豆腐送达时发现两板已经压碎，无法进入食堂窗口。客户要求在 10:30 前完成补货。</div>
+                        <div class="detail-title">现场凭证</div>
+                        <div class="evidence-grid">
+                            <div class="evidence-img">📸</div>
+                            <div class="evidence-img">📸</div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn-pickup" onclick="pickupOrder('温州二中')">立即抢单</button>
+                            <button class="btn-ignore">暂不处理</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="section-label">⚪ 普通工单 (2)</div>
-                <div class="order-card">
+                <div class="section-label">⚪️ 普通工单</div>
+                <div class="order-card expandable" onclick="toggleExpand(this)">
                     <div class="order-main">
                         <div class="order-priority-bar bar-normal"></div>
                         <div class="order-info">
-                            <div class="order-title">实验小学 · 青菜退货</div>
-                            <div class="order-meta"><span>上报 25min 前</span><span>李师傅上报</span></div>
+                            <div class="order-title">市府食堂 · 土豆 · 补货</div>
+                            <div class="order-meta">赵师傅上报 · 12分钟前</div>
                         </div>
-                        <button class="pickup-btn" onclick="pickupOrder('实验小学')">抢单</button>
+                        <span class="tag-status tag-pool">待抢单</span>
                     </div>
-                </div>
-                <div class="order-card">
-                    <div class="order-main">
-                        <div class="order-priority-bar bar-low"></div>
-                        <div class="order-info">
-                            <div class="order-title">市府办食堂 · 牛肉补单</div>
-                            <div class="order-meta"><span>上报 1h 前</span><span>王师傅上报</span></div>
+                    <div class="detail-panel">
+                        <div class="detail-title">问题描述</div>
+                        <div class="detail-content">清点发现少送了一筐土豆。</div>
+                        <div class="action-btns">
+                            <button class="btn-pickup" onclick="pickupOrder('市府食堂')">立即抢单</button>
+                            <button class="btn-ignore">暂不处理</button>
                         </div>
-                        <button class="pickup-btn" onclick="pickupOrder('市府办')">抢单</button>
                     </div>
                 </div>
             </div>
@@ -172,54 +170,31 @@
         <!-- Navigation Tab: 我的工单 -->
         <div id="my" class="tab-content">
             <div class="sub-nav">
-                <div class="sub-item active" onclick="switchSubTab('pending')">处理中 (2)</div>
-                <div class="sub-item" onclick="switchSubTab('completed')">已完成</div>
+                <div class="sub-item active" onclick="switchSubTab('processing')">处理中 (2)</div>
+                <div class="sub-item" onclick="switchSubTab('done')">已完成</div>
             </div>
-
-            <div id="sub-pending" class="sub-tab-content">
-                <div class="order-scroll">
-                    <!-- Case 1: In Progress -->
-                    <div class="order-card expanded">
-                        <div class="order-main">
-                            <div class="order-priority-bar bar-urgent"></div>
-                            <div class="order-info">
-                                <div class="order-title">实验小学 · 土豆 10斤</div>
-                                <div class="order-meta"><span>处理中</span><span>需垫付补购</span></div>
-                            </div>
-                            <span class="tag-status tag-todo">进行中</span>
-                        </div>
-                        <div class="order-detail">
-                            <div class="detail-inner">
-                                <div class="timeline">
-                                    <div class="timeline-item active">
-                                        <div class="timeline-dot"></div>
-                                        <div class="timeline-content">已联系点位负责人确认数量</div>
-                                        <div class="timeline-time">10:45</div>
-                                    </div>
-                                    <div class="timeline-item">
-                                        <div class="timeline-dot"></div>
-                                        <div class="timeline-content">正在前往农贸市场补购</div>
-                                        <div class="timeline-time">刚刚</div>
-                                    </div>
-                                </div>
-                            </div>
+            
+            <div class="order-scroll" id="sub-processing">
+                <div class="section-label">🛠️ 正在跟进</div>
+                <div class="order-card">
+                    <div class="order-main">
+                        <div class="order-info">
+                            <div class="order-title">实验中学 · 青菜 · 退货</div>
+                            <div class="order-meta">状态：等待供应商确认</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="sub-completed" class="sub-tab-content" style="display:none;">
-                <div class="order-scroll" id="my-completed-list">
-                    <!-- Case 6: History -->
-                    <div class="order-card" style="opacity:0.7">
-                        <div class="order-main">
-                            <div class="order-priority-bar" style="background:var(--green-500)"></div>
-                            <div class="order-info">
-                                <div class="order-title">温州一中 · 芹菜 5斤</div>
-                                <div class="order-meta"><span>已归档</span><span>垫付 ¥12.00</span></div>
-                            </div>
-                            <span class="tag-status tag-done">已完成</span>
+            <div class="order-scroll" id="sub-done" style="display:none;">
+                <div class="section-label">✅ 今日完成</div>
+                <div class="order-card" style="opacity:0.6;">
+                    <div class="order-main">
+                        <div class="order-info">
+                            <div class="order-title">八中 · 鸡蛋 · 补货</div>
+                            <div class="order-meta">完成于 09:30</div>
                         </div>
+                        <span class="tag-status tag-done">已完成</span>
                     </div>
                 </div>
             </div>
