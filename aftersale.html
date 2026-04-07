@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>售后专员 — DeepDelivery</title>
+    <link rel="stylesheet" href="styles/theme.css">
+    <style>
+        .page-layout { display: flex; flex-direction: column; height: 100vh; background: var(--gray-950); }
+
+        .page-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(3, 7, 18, 0.4); backdrop-filter: blur(12px); z-index: 100;
+        }
+        .page-header-left { display: flex; align-items: center; gap: 12px; }
+        .page-header-right { display: flex; align-items: center; gap: 12px; }
+        .page-title { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+
+        /* Navigation Content */
+        .tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .tab-content.active { display: flex; }
+
+        /* Sub-navigation for My Orders */
+        .sub-nav {
+            display: flex; background: rgba(255,255,255,0.02); padding: 8px 24px;
+            gap: 20px; border-bottom: 1px solid var(--glass-border); flex-shrink: 0;
+        }
+        .sub-item {
+            font-size: 14px; font-weight: 800; color: var(--gray-500); padding: 12px 0;
+            position: relative; cursor: pointer; transition: color 0.2s;
+        }
+        .sub-item.active { color: var(--blue-400); }
+        .sub-item.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: var(--blue-500); border-radius: var(--radius-full); box-shadow: 0 0 10px var(--blue-500);
+        }
+
+        /* Stats bar */
+        .stats-bar { display: flex; gap: 12px; padding: 20px 20px; overflow-x: auto; flex-shrink: 0; }
+        .stat-pill {
+            flex-shrink: 0; padding: 12px 18px; border-radius: var(--radius-xl);
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--gray-400);
+        }
+        .stat-pill .num { font-size: 18px; font-weight: 900; color: var(--white); }
+        .stat-pill.urgent { border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.05); }
+        .stat-pill.urgent .num { color: var(--rose-500); }
+
+        /* Scroll Area */
+        .order-scroll { flex: 1; overflow-y: auto; padding: 0 20px 100px; }
+        .section-label { font-size: 11px; font-weight: 900; color: var(--gray-500); letter-spacing: 1.5px; margin: 24px 0 16px; text-transform: uppercase; }
+
+        /* Cards */
+        .order-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl); margin-bottom: 16px; overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative;
+        }
+        .order-card.expandable:active { background: var(--glass-bg-hover); transform: scale(0.98); }
+
+        .order-main { padding: 18px; display: flex; align-items: center; gap: 16px; position: relative; z-index: 2; }
+        .order-priority-bar { width: 4px; height: 48px; border-radius: 2px; flex-shrink: 0; }
+        .bar-urgent { background: var(--rose-500); box-shadow: 0 0 10px rgba(244, 63, 94, 0.5); }
+        .bar-normal { background: var(--amber-500); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+        .bar-low { background: var(--gray-500); }
+
+        .order-info { flex: 1; }
+        .order-title { font-size: 17px; font-weight: 800; color: var(--white); letter-spacing: -0.2px; }
+        .order-meta { font-size: 12px; color: var(--gray-500); margin-top: 6px; display: flex; gap: 10px; align-items: center; font-weight: 600; }
+
+        .pickup-btn { background: var(--blue-600); border: none; padding: 12px 24px; border-radius: var(--radius-md); color: white; font-weight: 900; font-size: 13px; cursor: pointer; z-index: 10; box-shadow: 0 8px 16px rgba(37,99,235,0.25); }
+        .pickup-btn:active { transform: translateY(2px); box-shadow: 0 4px 8px rgba(37,99,235,0.2); }
+
+        /* Contact Info Badge */
+        .contact-panel {
+            background: rgba(255,255,255,0.02); padding: 14px 18px;
+            border-top: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;
+        }
+        .contact-info { display: flex; align-items: center; gap: 12px; }
+        .contact-label { font-size: 11px; color: var(--gray-500); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .contact-name { font-size: 14px; color: var(--white); font-weight: 800; }
+        .call-btn {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--blue-600);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.4); transition: transform 0.2s;
+        }
+        .call-btn:active { transform: scale(0.9); }
+
+        /* Expand Panel */
+        .order-expand { display: none; padding: 0 18px 20px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); }
+        .order-card.expanded .order-expand { display: block; }
+        
+        .issue-evidence { margin-top: 16px; }
+        .evidence-label { font-size: 11px; font-weight: 900; color: var(--rose-400); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .evidence-photo { width: 100%; aspect-ratio: 16/9; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--gray-600); flex-direction: column; gap: 10px; transition: all 0.3s; }
+        .order-card:hover .evidence-photo { border-color: var(--glass-border-bright); background: rgba(255,255,255,0.05); }
+        .evidence-photo b { color: var(--gray-400); font-size: 15px; font-weight: 800; }
+
+        .expand-indicator { font-size: 10px; color: var(--gray-700); }
+        .order-card.expanded .expand-indicator { transform: rotate(180deg); }
+
+        /* Detailed Action inside My Orders */
+        .order-action-panel { padding: 16px 0 0; }
+        .action-choice { display: flex; gap: 8px; margin-bottom: 16px; }
+        .mode-btn {
+            flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02); color: var(--gray-400); font-size: 13px; font-weight: 700; cursor: pointer;
+        }
+        .mode-btn.active { background: rgba(37,99,235,0.1); border-color: var(--blue-500); color: var(--blue-400); }
+
+        .market-action { display: none; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .price-input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .price-label { font-size: 13px; color: var(--gray-400); font-weight: 800; }
+        .price-field { background: transparent; border: none; border-bottom: 2px solid var(--blue-500); color: var(--white); font-size: 24px; font-weight: 900; width: 120px; text-align: right; outline: none; }
+
+        .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .photo-box { height: 80px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+        .photo-icon { font-size: 18px; }
+        .photo-text { font-size: 10px; color: var(--gray-600); font-weight: 800; }
+
+        .finish-task-btn {
+            width: 100%; padding: 16px; background: var(--blue-600); border: none; border-radius: var(--radius-md);
+            color: white; font-size: 15px; font-weight: 900; cursor: pointer;
+        }
+
+        /* History Detail */
+        .history-detail { padding-top: 12px; }
+        .history-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .history-label { color: var(--gray-600); }
+        .history-value { color: var(--gray-300); font-weight: 700; }
+        .history-photo-grid { display: flex; gap: 8px; margin-top: 8px; }
+        .history-photo-preview { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--gray-700); border: 1px solid rgba(255,255,255,0.1); }
+
+        /* Bottom Tab Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(17,24,39,0.95); backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; height: 64px; z-index: 1000;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--gray-600); font-size: 10px; font-weight: 800; cursor: pointer; gap: 4px;
+        }
+        .nav-item.active { color: var(--blue-500); }
+        .nav-icon { font-size: 20px; }
+
+        .toast {
+            position: fixed; top: 40px; left: 50%; transform: translateX(-50%);
+            background: var(--green-600); color: var(--white); padding: 12px 24px;
+            border-radius: var(--radius-full); font-weight: 700; font-size: 14px;
+            z-index: 10000; display: none; box-shadow: var(--shadow-xl);
+        }
+        .toast.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="page-layout">
+        <header class="page-header">
+            <div class="page-header-left">
+                <span class="page-title">售后工作台</span>
+            </div>
+            <div class="page-header-right">
+                <a href="select.html" class="switch-btn">🔄 切换角色</a>
+                <span class="header-badge">售后专员</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tab: 工单池 (Claims) -->
+        <div id="pool" class="tab-content active">
+            <div class="stats-bar">
+                <div class="stat-pill urgent"><span class="num">2</span> 紧急</div>
+                <div class="stat-pill"><span class="num">5</span> 普通</div>
+                <div class="stat-pill"><span class="num">12</span> 今日已处理</div>
+            </div>
+            
+            <div class="order-scroll">
+                <div class="section-label">🔴 紧急工单 (优先处理)</div>
+                <!-- Case 1: Damage -->
+                <div class="order-card expandable" onclick="toggleExpand(this)">
+                    <div class="order-main">
+                        <div class="order-priority-bar bar-urgent"></div>
+                        <div class="order-info">
+                            <div class="order-title">温州二中 · 豆腐 2板</div>
+                            <div class="order-meta"><span>换货</span><span>2分钟前</span></div>
+                        </div>
+                        <button class="pickup-btn" onclick="event.stopPropagation(); pickupOrder('wo_豆腐')">抢单</button>
+                    </div>
+                    <div class="order-expand" onclick="event.stopPropagation()">
+                        <div class="issue-evidence">
+                            <div class="evidence-label">⚠️ 现场报损证据</div>
+                            <div class="evidence-photo"><b>[ 豆腐破损照片.jpg ]</b><span>点击查看</span></div>
+                            <div style="margin-top:10px; font-size:13px; color:var(--gray-400);">司机描述：送货到门口发现箱子漏水，豆腐碎了。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 2: Missing -->
+                <div class="order-card expandable" onclick="toggleExpand(this)">
+                    <div class="order-main">
+                        <div class="order-priority-bar bar-urgent"></div>
+                        <div class="order-info">
+                            <div class="order-title">温州三中 · 牛肉 10斤</div>
+                            <div class="order-meta"><span>补货</span><span>5分钟前</span></div>
+                        </div>
+                        <button class="pickup-btn" onclick="event.stopPropagation(); pickupOrder('wo_牛肉')">抢单</button>
+                    </div>
+                    <div class="order-expand" onclick="event.stopPropagation()">
+                        <div class="issue-evidence">
+                            <div class="evidence-label">⚠️ 缺货现场核实</div>
+                            <div class="evidence-photo" style="background:rgba(239,68,68,0.05);"><b>[ 现场称重视频.mp4 ]</b><span>点击播放</span></div>
+                            <div style="margin-top:10px; font-size:13px; color:var(--gray-400);">司机描述：后厨称重发现少了一块牛肉，库房漏发了。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🟡 普通工单</div>
+                <!-- Case 3: Quality -->
+                <div class="order-card expandable" onclick="toggleExpand(this)">
+                    <div class="order-main">
+                        <div class="order-priority-bar bar-normal"></div>
+                        <div class="order-info">
+                            <div class="order-title">实验中学 · 青椒 20斤</div>
+                            <div class="order-meta"><span>品质争议</span><span>15分钟前</span></div>
+                        </div>
+                        <button class="pickup-btn" onclick="event.stopPropagation(); pickupOrder('wo_青椒')">抢单</button>
+                    </div>
+                    <div class="order-expand">
+                        <div class="issue-evidence">
+                            <div class="evidence-label">📋 品质争议详情</div>
+                            <div class="evidence-photo"><b>[ 青椒细节图.png ]</b><span>点击查看</span></div>
+                            <div style="margin-top:10px; font-size:13px; color:var(--gray-400);">司机描述：客户觉得青椒有点焉了，想换一批新鲜的，不急用。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tab: 我的工单 (My Work) -->
+        <div id="my" class="tab-content">
+            <div class="sub-nav">
+                <div class="sub-item active" onclick="switchSubTab('processing')">处理中 (2)</div>
+                <div class="sub-item" onclick="switchSubTab('completed')">已结案 (12)</div>
+            </div>
+
+            <div id="sub-processing" class="sub-tab-content active">
+                <div class="order-scroll">
+                    <div class="section-label">🛠️ 正在执行</div>
+                    <!-- Case 4: My Task -->
+                    <div class="order-card">
+                        <div class="order-main">
+                            <div class="order-priority-bar bar-urgent"></div>
+                            <div class="order-info">
+                                <div class="order-title">实验小学 · 鸡蛋 1筐</div>
+                                <div class="order-meta" style="color:var(--blue-400);">外购配送中 · 已联系李主任</div>
+                            </div>
+                        </div>
+                        <div class="contact-panel">
+                            <div class="contact-info"><span class="contact-label">验收人</span><span class="contact-name">李主任 (后厨)</span></div>
+                            <div class="call-btn" onclick="window.location.href='tel:13800001234'">📞</div>
+                        </div>
+                    </div>
+
+                    <!-- Case 5: My Task -->
+                    <div class="order-card">
+                        <div class="order-main">
+                            <div class="order-priority-bar bar-normal"></div>
+                            <div class="order-info">
+                                <div class="order-title">南站配餐 · 白菜 50斤</div>
+                                <div class="order-meta" style="color:var(--amber-500);">已送达点位 · 待拍摄凭证</div>
+                            </div>
+                        </div>
+                        <div style="padding:0 16px 16px;">
+                            <div class="action-choice">
+                                <button class="mode-btn active">📸 拍照结案</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sub-completed" class="sub-tab-content" style="display:none;">
+                <div class="order-scroll" id="my-completed-list">
+                    <!-- Case 6: History -->
+                    <div class="order-card" style="opacity:0.7">
+                        <div class="order-main">
+                            <div class="order-priority-bar" style="background:var(--green-500)"></div>
+                            <div class="order-info">
+                                <div class="order-title">温州一中 · 芹菜 5斤</div>
+                                <div class="order-meta"><span>已归档</span><span>垫付 ¥12.00</span></div>
+                            </div>
+                            <span class="tag-status tag-done">已完成</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tab: 个人中心 -->
+        <div id="profile" class="tab-content">
+            <div class="order-scroll">
+                <div class="section-label">📊 个人数据</div>
+                <div class="order-card" style="padding:24px; text-align:center;">
+                    <div style="font-size:32px; font-weight:900; color:var(--white);">12</div>
+                    <div style="font-size:12px; color:var(--gray-500); margin-top:4px;">今日处理工单</div>
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <div style="flex:1; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                            <div style="font-size:16px; color:var(--blue-400); font-weight:900;">98%</div>
+                            <div style="font-size:10px; color:var(--gray-600);">及时率</div>
+                        </div>
+                        <div style="flex:1; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                            <div style="font-size:16px; color:var(--green-400); font-weight:900;">4.9</div>
+                            <div style="font-size:10px; color:var(--gray-600);">客户评分</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('pool')">
+                <span class="nav-icon">📦</span>
+                <span>工单池</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('my')">
+                <span class="nav-icon">🛠️</span>
+                <span>我的工单</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile')">
+                <span class="nav-icon">👤</span>
+                <span>个人中心</span>
+            </div>
+        </nav>
+    </div>
+
+    <div class="toast" id="toast">✅ 操作成功</div>
+
+    <script>
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function switchSubTab(subId) {
+            document.querySelectorAll('.sub-tab-content').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('sub-' + subId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        function toggleExpand(card) {
+            card.classList.toggle('expanded');
+        }
+
+        function pickupOrder(name) {
+            showToast("✅ 抢单成功，已存入【我的工单】");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+</html>
