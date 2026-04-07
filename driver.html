@@ -5,8 +5,413 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>司机执行端 (多维工作台) — DeepDelivery</title>
     <link rel="stylesheet" href="styles/theme.css">
+    <style>
+        .driver-layout { display: flex; flex-direction: column; height: 100vh; background: var(--gray-950); overflow: hidden; }
+
+        /* Header */
+        .driver-header {
+            padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--glass-border); background: rgba(3, 7, 18, 0.4); backdrop-filter: blur(12px); flex-shrink: 0;
+        }
+        .header-left { display: flex; flex-direction: column; }
+        .header-title { font-size: 20px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; }
+        .header-sub { font-size: 11px; color: var(--gray-500); margin-top: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        /* Main Viewport */
+        .viewport { flex: 1; overflow-y: auto; position: relative; }
+        .page-section { display: none; padding-bottom: 100px; }
+        .page-section.active { display: block; }
+
+        /* Task List Styles */
+        .task-scroll { padding: 16px 20px; }
+        .section-label { font-size: 11px; font-weight: 900; color: var(--gray-500); margin: 32px 0 16px; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+
+        .task-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl); padding: 18px; margin-bottom: 16px;
+            display: flex; flex-direction: column; gap: 16px; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .task-card.active { border-left: 4px solid var(--blue-500); background: rgba(37,99,235,0.06); box-shadow: var(--glow-blue); }
+        .task-card.flex-active { border-left: 4px solid var(--gray-600); }
+        .task-card.delivered { border-left: 4px solid var(--amber-500); background: rgba(245,158,11,0.04); }
+        .task-card.closed { border-left: 4px solid var(--green-500); background: rgba(34, 197, 94, 0.02); opacity: 0.6; }
+
+        .task-main { display: flex; justify-content: space-between; align-items: flex-start; }
+        .task-info { flex: 1; }
+        .task-name { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -0.2px; }
+        .task-time { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--gray-400); }
+        .time-badge { font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+        .badge-strict { background: rgba(239,68,68,0.15); color: var(--rose-500); }
+        .badge-flex { background: var(--glass-bg); color: var(--gray-500); border: 1px solid var(--glass-border); }
+        
+        .status-tag { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.5px; }
+        .tag-waiting { background: rgba(37,99,235,0.15); color: var(--blue-400); }
+        .tag-delivered { background: rgba(245,158,11,0.15); color: var(--amber-500); }
+        .tag-closed { background: rgba(34, 197, 94, 0.15); color: var(--green-400); }
+
+        .task-summary { background: rgba(255,255,255,0.02); border-radius: 12px; padding: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--glass-border); }
+        .summary-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; font-weight: 700; }
+        .summary-label { color: var(--gray-500); font-size: 10px; font-weight: 900; width: 60px; text-transform: uppercase; }
+        .summary-val { color: var(--gray-300); flex: 1; }
+        .summary-photo-tag { color: var(--blue-400); font-size: 10px; }
+        .issue { color: var(--rose-400); }
+
+        /* Voice Overlay */
+        .voice-sheet {
+            position: fixed; inset: 0; background: rgba(3, 7, 18, 0.9); backdrop-filter: blur(20px);
+            z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 80px;
+        }
+        .voice-circle {
+            width: 100px; height: 100px; border-radius: 50%; background: var(--blue-600);
+            display: flex; align-items: center; justify-content: center; font-size: 40px;
+            box-shadow: 0 0 40px var(--blue-600); animation: pulse 1.5s infinite; margin-bottom: 40px;
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .voice-text { font-size: 20px; font-weight: 900; color: var(--white); text-align: center; max-width: 80%; line-height: 1.4; }
+        .voice-sub { font-size: 14px; color: var(--gray-500); margin-top: 12px; font-weight: 700; }
+        .voice-close { position: absolute; top: 40px; right: 24px; font-size: 24px; color: var(--gray-500); }
+
+        /* Report Sheet */
+        .report-sheet {
+            position: fixed; left: 0; right: 0; bottom: 0; background: var(--gray-900);
+            border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0;
+            padding: 24px; z-index: 2500; display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .report-title { font-size: 18px; font-weight: 900; color: var(--white); }
+        .report-field { margin-bottom: 20px; }
+        .field-label { font-size: 12px; font-weight: 800; color: var(--gray-500); margin-bottom: 10px; display: block; }
+        .field-input {
+            width: 100%; background: var(--gray-800); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 14px; color: var(--white); font-weight: 700; font-size: 15px;
+        }
+        .ai-issue-block { background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+        .photo-strip { display: flex; gap: 10px; margin-top: 12px; }
+        .photo-box { width: 60px; height: 60px; border-radius: 8px; background: var(--gray-800); border: 1px dashed var(--gray-600); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+            background: rgba(3, 7, 18, 0.8); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border); display: flex; z-index: 1000;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--gray-600); cursor: pointer; }
+        .nav-item.active { color: var(--blue-400); }
+        .nav-icon { font-size: 24px; }
+        .nav-label { font-size: 10px; font-weight: 900; text-transform: uppercase; }
+
+        /* Toast */
+        #toast {
+            position: fixed; top: 40px; left: 50%; transform: translateX(-50%);
+            background: var(--blue-600); color: white; padding: 12px 24px;
+            border-radius: var(--radius-full); font-weight: 900; font-size: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); z-index: 5000; display: none;
+        }
+
+        /* Map Simulation */
+        .map-bg { position: absolute; inset: 0; background: #0f172a; overflow: hidden; }
+        .map-marker { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--blue-500); box-shadow: 0 0 10px var(--blue-500); }
+    </style>
 </head>
 <body>
-    <h1>司机执行端</h1>
+    <div class="driver-layout">
+        <header class="driver-header">
+            <div class="header-left">
+                <span class="header-title">任务清单</span>
+                <span class="header-sub">04月07日 · 晨间配送</span>
+            </div>
+            <div class="header-right">
+                <a href="select.html" class="switch-btn">🔄 切换</a>
+                <div class="header-badge" style="color:var(--emerald-400); background:rgba(16,185,129,0.1);">工作中</div>
+            </div>
+        </header>
+
+        <main class="viewport">
+            <!-- PAGE: TASKS -->
+            <section id="tasks" class="page-section active">
+                <div class="task-scroll">
+                    <div class="section-label">正在执行 (1)</div>
+                    <div class="task-card active" id="card-二中">
+                        <div class="task-main">
+                            <div class="task-info">
+                                <div class="task-name">温州第二中学</div>
+                                <div class="task-time">
+                                    <span class="time-badge badge-strict">准时考核</span>
+                                    <span>预计 06:45 送达 (剩 12min)</span>
+                                </div>
+                            </div>
+                            <span class="status-tag tag-waiting">配送中</span>
+                        </div>
+                        <div class="task-actions">
+                            <button class="action-btn btn-primary" onclick="confirmDeliver('card-二中')">✅ 确认送达</button>
+                            <button class="action-btn btn-voice" onclick="openVoice('card-二中')">📢 语音录入</button>
+                        </div>
+                    </div>
+
+                    <div class="section-label">待补录 (0)</div>
+                    <div id="list-delivered"></div>
+
+                    <div class="section-label">已结案 (2)</div>
+                    <div id="list-closed">
+                        <div class="task-card closed" id="card-实小">
+                            <div class="task-main">
+                                <div class="task-info">
+                                    <div class="task-name">温州实验小学</div>
+                                    <div class="task-time">05:32 确认送达</div>
+                                </div>
+                                <span class="status-tag tag-closed">已结案</span>
+                            </div>
+                            <div class="task-summary">
+                                <div class="summary-row">
+                                    <span class="summary-label">📦 周转筐</span>
+                                    <div class="summary-val">今日 15/15 · 结存 <b style="color:var(--gray-500);">0</b></div>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="action-btn btn-voice" onclick="openVoice('card-实小')">📢 语音补报</button>
+                            </div>
+                        </div>
+
+                        <div class="task-card closed" id="card-三中">
+                            <div class="task-main">
+                                <div class="task-info">
+                                    <div class="task-name">温州第三中学</div>
+                                    <div class="task-time">05:10 确认送达</div>
+                                </div>
+                                <span class="status-tag tag-closed">已结案</span>
+                            </div>
+                            <div class="task-summary">
+                                <div class="summary-row">
+                                    <span class="summary-label">📦 周转筐</span>
+                                    <div class="summary-val">今日 8/8 · 结存 <b style="color:var(--gray-500);">0</b></div>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="action-btn btn-voice" onclick="openVoice('card-三中')">📢 语音补报</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-label">后续计划 (1)</div>
+                    <div class="task-card flex-active">
+                        <div class="task-main">
+                            <div class="task-info">
+                                <div class="task-name">市府办食堂</div>
+                                <div class="task-time">
+                                    <span class="time-badge badge-flex">柔性时间</span>
+                                    <span>建议 07:30 前送达</span>
+                                </div>
+                            </div>
+                            <span class="status-tag" style="background:rgba(255,255,255,0.05); color:var(--gray-600);">待配送</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: MAP -->
+            <section id="map" class="page-section" style="height: 100%;">
+                <div class="map-bg">
+                    <div class="map-marker" style="left: 100px; top: 100px;"></div>
+                    <div class="map-marker" style="left: 240px; top: 240px; background: var(--rose-500); box-shadow: 0 0 15px var(--rose-500);"></div>
+                    <div style="position: absolute; bottom: 120px; left: 20px; right: 20px; background: var(--gray-900); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px;">
+                        <div style="font-size: 14px; color: var(--gray-400); margin-bottom: 4px; font-weight: 700;">导航至</div>
+                        <div style="font-size: 18px; font-weight: 900; color: var(--white);">温州第二中学 (正门)</div>
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <div style="flex: 1; background: var(--blue-600); padding: 12px; border-radius: 12px; text-align: center; font-weight: 900;">开始导航</div>
+                            <div style="width: 50px; background: var(--gray-800); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; justify-content: center;">🧭</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="voice-sheet" id="voiceSheet">
+            <div class="voice-close" onclick="closeVoice()">✕</div>
+            <div class="voice-circle">🎙️</div>
+            <div class="voice-text" id="voiceStatus">请说话...</div>
+            <div class="voice-sub">支持：上报售后、记录周转筐数量</div>
+        </div>
+
+        <div class="report-sheet" id="reportSheet">
+            <div class="report-header">
+                <span class="report-title">智能语义解析结果</span>
+                <span style="font-size: 14px; color: var(--blue-400); font-weight: 900;" onclick="submitReport()">确认提交</span>
+            </div>
+            
+            <div id="ai-issue-block" class="ai-issue-block">
+                <span class="field-label" style="color:var(--rose-400);">Detected Issue / 异常检测</span>
+                <div style="font-size:16px; font-weight:900; color:var(--white);" id="issue-content"></div>
+                <div class="photo-strip">
+                    <div class="photo-box" onclick="takePhoto()">📷</div>
+                    <div id="photo-preview" style="display:none;">
+                        <div class="photo-box" style="border-style:solid; border-color:var(--blue-500); position:relative; overflow:hidden;">
+                            <img id="captured-img" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                    </div>
+                    <div style="font-size:10px; color:var(--gray-500); align-self:center;">点击拍摄异常证据图片</div>
+                </div>
+            </div>
+
+            <div class="report-field">
+                <span class="field-label">📦 周转筐变动 (Crates)</span>
+                <div style="display:flex; gap:12px;">
+                    <div style="flex:1;">
+                        <div style="font-size:10px; color:var(--gray-500); margin-bottom:4px;">今日投放</div>
+                        <input type="number" class="field-input" id="in-leave" value="12">
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-size:10px; color:var(--gray-500); margin-bottom:4px;">现场回收</div>
+                        <input type="number" class="field-input" id="in-take" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 11px; color: var(--gray-600); font-weight: 700;">
+                AI 已自动根据语音填充以上字段，请核对。
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchMainTab('tasks')">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">任务</span>
+            </div>
+            <div class="nav-item" onclick="switchMainTab('map')">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">地图</span>
+            </div>
+            <div class="nav-item" onclick="location.href='select.html'">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">我的</span>
+            </div>
+        </nav>
+    </div>
+
+    <div id="toast">✅ 操作成功</div>
+
+    <script>
+        let currentCardId = null;
+        let isPhotoTaken = false;
+
+        function switchMainTab(id) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function openVoice(id) {
+            currentCardId = id;
+            isPhotoTaken = false;
+            document.getElementById('voiceSheet').style.display = 'flex';
+            document.getElementById('voiceStatus').innerText = "正在倾听...";
+            
+            setTimeout(() => {
+                document.getElementById('voiceStatus').innerHTML = "“留了12个筐，收回来10个，<span style='color:var(--rose-400)'>豆腐坏了一盒</span>”";
+                setTimeout(() => {
+                    closeVoice();
+                    openReport();
+                }, 1500);
+            }, 1000);
+        }
+
+        function closeVoice() {
+            document.getElementById('voiceSheet').style.display = 'none';
+        }
+
+        function openReport() {
+            document.getElementById('issue-content').innerText = "豆腐 · 换货 (损毁)";
+            document.getElementById('ai-issue-block').style.display = "block";
+            document.getElementById('reportSheet').style.display = 'block';
+            document.getElementById('photo-preview').style.display = 'none';
+        }
+
+        function takePhoto() {
+            isPhotoTaken = true;
+            document.getElementById('photo-preview').style.display = 'block';
+            document.getElementById('captured-img').src = "https://images.unsplash.com/photo-1584263347416-85a696b4eda7?auto=format&fit=crop&q=80&w=200";
+            showToast("📸 照片已拍摄并由 AI 校验");
+        }
+
+        function submitReport() {
+            const card = document.getElementById(currentCardId);
+            const isClosed = card.classList.contains('closed');
+            const issueContent = document.getElementById('issue-content').innerText;
+
+            if (document.getElementById('ai-issue-block').style.display !== 'none' && !isPhotoTaken) {
+                alert("请先点击拍摄异常图片证据！"); return;
+            }
+
+            document.getElementById('reportSheet').style.display = 'none';
+            
+            if (isClosed) {
+                const summary = card.querySelector('.task-summary');
+                const issueRow = summary.querySelectorAll('.summary-row')[1];
+                const val = issueRow.querySelector('.summary-val');
+                val.innerHTML += `<br><span class="issue">${issueContent} <span class="summary-photo-tag">📷</span></span>`;
+                showToast("✅ 售后补报成功");
+            } else if (card.classList.contains('delivered')) {
+                card.className = "task-card closed";
+                card.querySelector('.status-tag').innerText = "已结案";
+                card.querySelector('.status-tag').className = "status-tag tag-closed";
+                if (card.querySelector('.notif-warn')) card.querySelector('.notif-warn').remove();
+                
+                const summary = document.createElement('div');
+                summary.className = "task-summary";
+                
+                // Determine point-specific simulated balance
+                let pointBal = (currentCardId === 'card-二中') ? "12" : (currentCardId === 'card-市府' ? "5" : "10");
+                
+                summary.innerHTML = `
+                    <div class="summary-row">
+                        <span class="summary-label">📦 周转筐</span>
+                        <div class="summary-val">今日 12/10 · 结存 <b style="color:var(--blue-400);">${pointBal}</b></div>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">📢 售后</span>
+                        <div class="summary-val"><span class="issue">${issueContent} <span class="summary-photo-tag">📷</span></span></div>
+                    </div>
+                `;
+                card.querySelector('.task-main').after(summary);
+                card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" onclick="openVoice('${currentCardId}')">📢 语音补报</button>`;
+                document.getElementById('list-closed').prepend(card);
+                showToast("✅ 结案成功");
+            } else {
+                if (!card.querySelector('.notif-crate')) {
+                    const badge = document.createElement('div');
+                    badge.className = "task-notif notif-crate";
+                    badge.innerText = "📦 已录筐数：留12/收10";
+                    card.querySelector('.task-main').after(badge);
+                }
+                showToast("✅ 录入成功");
+            }
+        }
+
+        function confirmDeliver(id) {
+            const card = document.getElementById(id);
+            card.className = "task-card delivered";
+            card.querySelector('.status-tag').innerText = "待补录";
+            card.querySelector('.status-tag').className = "status-tag tag-delivered";
+            card.querySelector('.task-time').innerText = "刚刚确认送达";
+            const warn = document.createElement('div');
+            warn.className = "task-notif notif-warn";
+            warn.innerText = "⚠️ 尚未记录周转筐回收数量";
+            card.querySelector('.task-main').after(warn);
+            card.querySelector('.task-actions').innerHTML = `<button class="action-btn btn-voice" style="background:var(--amber-600); color:white;" onclick="openVoice('${id}')">📢 语音录入 (售后/周转筐)</button>`;
+            document.getElementById('list-delivered').appendChild(card);
+            showToast("🚚 状态更新成功");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+    </script>
 </body>
 </html>
