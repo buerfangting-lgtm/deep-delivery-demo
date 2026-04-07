@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>老板看板 — DeepDelivery</title>
+    <link rel="stylesheet" href="styles/theme.css">
+    <style>
+        .boss-layout { display: flex; flex-direction: column; height: 100vh; background: var(--gray-950); overflow: hidden; }
+
+        /* Header */
+        .boss-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--glass-border);
+            background: rgba(3, 7, 18, 0.4); backdrop-filter: blur(12px); flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-title { font-size: 20px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; }
+        
+        /* Viewport */
+        .viewport { flex: 1; overflow-y: auto; position: relative; padding-bottom: 100px; }
+        .page-section { display: none; padding: 20px; }
+        .page-section.active { display: block; animation: fadeInUp 0.4s ease; }
+
+        /* AI Block */
+        .ai-card {
+            background: linear-gradient(135deg, rgba(37,99,235,0.1) 0%, rgba(139,92,246,0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-xl);
+            padding: 20px; margin-bottom: 24px; position: relative; overflow: hidden;
+        }
+        .ai-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); pointer-events: none; }
+        .ai-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 900; color: var(--blue-400); margin-bottom: 10px; }
+        .ai-text { font-size: 14px; color: var(--gray-300); line-height: 1.6; font-weight: 600; }
+
+        /* Stats Grid */
+        .stats-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: 20px; margin-bottom: 20px; }
+        .card-label { font-size: 11px; font-weight: 900; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; justify-content: space-between; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat-box { 
+            padding: 16px; background: rgba(255,255,255,0.02); border-radius: var(--radius-lg); 
+            border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s;
+        }
+        .stat-box:active { transform: scale(0.96); background: rgba(255,255,255,0.08); }
+        .stat-label { font-size: 10px; color: var(--gray-500); font-weight: 800; margin-bottom: 6px; }
+        .stat-val { font-size: 24px; font-weight: 900; color: var(--white); }
+        .stat-trend { font-size: 10px; margin-top: 4px; font-weight: 700; }
+        .trend-up { color: var(--rose-500); }
+        .trend-ok { color: var(--green-500); }
+
+        /* Distribution & Charts */
+        .chart-row { display: flex; align-items: center; gap: 24px; margin-top: 10px; }
+        .pie-sim {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(var(--rose-500) 0% 25%, var(--amber-500) 25% 65%, var(--blue-500) 65% 90%, var(--green-500) 90% 100%);
+            position: relative; flex-shrink: 0;
+        }
+        .pie-sim::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: var(--gray-900); border-radius: 50%; }
+        .legend { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: var(--gray-500); }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+        /* List View */
+        .list-view { display: none; position: absolute; top: 0; left: 0; right: 0; min-height: 100%; background: var(--gray-950); z-index: 200; padding: 20px; animation: slideInRight 0.3s ease; }
+        .list-view.active { display: block; }
+        .list-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+        .back-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--white); padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+        
+        .order-row { 
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; 
+            padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; 
+        }
+        .status-pill { width: 4px; height: 24px; border-radius: 2px; }
+        .order-info { flex: 1; }
+        .order-name { font-size: 15px; font-weight: 800; color: var(--white); }
+        .order-meta { font-size: 11px; color: var(--gray-500); margin-top: 4px; font-weight: 600; }
+        .order-tag { font-size: 10px; font-weight: 900; color: var(--gray-400); text-transform: uppercase; }
+
+        /* Crate Styles */
+        .crate-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--glass-border); }
+        .crate-item:last-child { border-bottom: none; }
+        .point-name { font-size: 14px; font-weight: 800; color: var(--white); }
+        .point-status { font-size: 10px; color: var(--rose-500); font-weight: 700; margin-top: 2px; }
+        .crate-val { font-size: 20px; font-weight: 900; color: var(--blue-400); }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 72px;
+            background: rgba(17,24,39,0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 0 10px; z-index: 3000;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray-600); cursor: pointer; }
+        .nav-item.active { color: var(--blue-500); }
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 10px; font-weight: 800; }
+
+        /* Tabs */
+        .time-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .time-tab { 
+            flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 800; 
+            color: var(--gray-500); border-radius: 10px; border: 1px solid var(--glass-border); cursor: pointer;
+        }
+        .time-tab.active { background: var(--blue-600); color: var(--white); border-color: var(--blue-500); }
+
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+    <div class="boss-layout">
+        <header class="boss-header">
+            <span class="header-title" id="pageTitle">数据看板</span>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="select.html" style="text-decoration: none; font-size: 12px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; color: var(--gray-400); font-weight: 800; border: 1px solid var(--glass-border);">🔄 切换</a>
+                <span style="font-size: 10px; font-weight: 900; color: var(--blue-400); letter-spacing: 1px;">BOSS</span>
+            </div>
+        </header>
+
+        <main class="viewport">
+            <!-- PAGE: DASHBOARD -->
+            <section id="dashboard" class="page-section active">
+                <div class="time-tabs">
+                    <div class="time-tab active">今日</div>
+                    <div class="time-tab">本周</div>
+                    <div class="time-tab">本月</div>
+                </div>
+
+                <div class="ai-card">
+                    <div class="ai-badge">✨ AI 智能运营简报</div>
+                    <div class="ai-text">
+                        今日配送链路平稳，售后率 <strong>2.4%</strong>。注意：<strong>温州二中</strong> 周转筐留存已达 12 个，建议今日回收。
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="card-label">📊 售后工单概况 <span>全量数据</span></div>
+                    <div class="stats-grid">
+                        <div class="stat-box" onclick="showList('all')">
+                            <div class="stat-label">工单总数</div>
+                            <div class="stat-val">12</div>
+                            <div class="stat-trend trend-up">↑ 12%</div>
+                        </div>
+                        <div class="stat-box" onclick="showList('pending')">
+                            <div class="stat-label">待处理</div>
+                            <div class="stat-val" style="color:var(--rose-500);">3</div>
+                            <div class="stat-trend" style="color:var(--gray-600);">需介入</div>
+                        </div>
+                        <div class="stat-box" onclick="showList('processing')">
+                            <div class="stat-label">处理中</div>
+                            <div class="stat-val" style="color:var(--amber-500);">4</div>
+                            <div class="stat-trend" style="color:var(--gray-600);">进行中</div>
+                        </div>
+                        <div class="stat-box" onclick="showList('completed')">
+                            <div class="stat-label">已完成</div>
+                            <div class="stat-val" style="color:var(--green-500);">5</div>
+                            <div class="stat-trend trend-ok">解决率 42%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="card-label">📦 周转筐概况 <span>资产实况</span></div>
+                    <div class="stats-grid">
+                        <div class="stat-box" style="grid-column: span 2;">
+                            <div class="stat-label">全部留存 (在途/点位)</div>
+                            <div class="stat-val" style="color:var(--blue-400);">102</div>
+                            <div class="stat-trend" style="color:var(--gray-600);">包含本周累计未清算点位</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">今日投放</div>
+                            <div class="stat-val">48</div>
+                            <div class="stat-trend trend-up">+5</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">今日回收</div>
+                            <div class="stat-val">32</div>
+                            <div class="stat-trend trend-ok">回收率 67%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="card-label">🎨 售后类型占比 <span>今日数据</span></div>
+                    <div class="chart-row">
+                        <div class="pie-sim"></div>
+                        <div class="legend">
+                            <div class="legend-item"><span class="dot" style="background:var(--rose-500);"></span> 退货 (25%)</div>
+                            <div class="legend-item"><span class="dot" style="background:var(--amber-500);"></span> 换货 (40%)</div>
+                            <div class="legend-item"><span class="dot" style="background:var(--blue-500);"></span> 补货 (25%)</div>
+                            <div class="legend-item"><span class="dot" style="background:var(--green-500);"></span> 新增 (10%)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: CRATE -->
+            <section id="crate" class="page-section">
+                <div class="stats-card" style="padding: 0;">
+                    <div class="card-label" style="padding: 20px 20px 0;">点位资产清单</div>
+                    <div class="crate-item">
+                        <div class="crate-info"><div class="point-name">温州二中</div><div class="point-status">⚠️ 留存超期 3 天</div></div>
+                        <div class="crate-val">12</div>
+                    </div>
+                    <div class="crate-item">
+                        <div class="crate-info"><div class="point-name">温州实验中学</div><div class="point-status">⚠️ 留存超期 2 天</div></div>
+                        <div class="crate-val">18</div>
+                    </div>
+                    <div class="crate-item">
+                        <div class="crate-info"><div class="point-name">温州一中</div><div style="font-size:10px; color:var(--green-500); margin-top:2px; font-weight:700;">✅ 状态正常</div></div>
+                        <div class="crate-val">85</div>
+                    </div>
+                    <div class="crate-item">
+                        <div class="crate-info"><div class="point-name">市府办食堂</div><div style="font-size:10px; color:var(--green-500); margin-top:2px; font-weight:700;">✅ 状态正常</div></div>
+                        <div class="crate-val">5</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SUB-PAGE: ORDER LIST -->
+            <div id="listView" class="list-view">
+                <div class="list-header">
+                    <button class="back-btn" onclick="hideList()">⬅️ 返回</button>
+                    <span id="listTitle" style="font-size:18px; font-weight:900;">工单列表</span>
+                </div>
+                <div id="listContent">
+                    <!-- Rows via JS -->
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">数据看板</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('crate')">
+                <span class="nav-icon">📦</span>
+                <span class="nav-label">周转筐</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile')">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">个人中心</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const orders = [
+            { id: '101', point: '二中', item: '豆腐', type: '换货', status: 'processing', reporter: '张师傅' },
+            { id: '102', point: '实小', item: '青菜', type: '退货', status: 'pending', reporter: '李师傅' },
+            { id: '103', point: '三中', item: '牛肉', type: '补货', status: 'completed', reporter: '王师傅' },
+            { id: '104', point: '市府', item: '土豆', type: '补货', status: 'completed', reporter: '赵师傅' },
+            { id: '105', point: '八中', item: '鸡蛋', type: '换货', status: 'pending', reporter: '调度A' },
+            { id: '106', point: '二中', item: '番茄', type: '补货', status: 'processing', reporter: '张师傅' }
+        ];
+
+        function switchTab(id) {
+            if (id === 'profile') { location.href = 'select.html'; return; }
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector(`[onclick*="${id}"]`).classList.add('active');
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('pageTitle').innerText = (id === 'dashboard') ? '数据看板' : '周转筐概览';
+            hideList();
+        }
+
+        function showList(filter) {
+            const view = document.getElementById('listView');
+            const content = document.getElementById('listContent');
+            const title = document.getElementById('listTitle');
+            
+            content.innerHTML = '';
+            const titles = { 'all': '全部工单', 'pending': '待处理工单', 'processing': '处理中工单', 'completed': '已完成工单' };
+            title.innerText = titles[filter];
+
+            const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+            
+            filtered.forEach(o => {
+                const colorMap = { 'pending': 'var(--rose-500)', 'processing': 'var(--amber-500)', 'completed': 'var(--green-500)' };
+                const row = document.createElement('div');
+                row.className = 'order-row';
+                row.innerHTML = `
+                    <div class="status-pill" style="background:${colorMap[o.status]}"></div>
+                    <div class="order-info">
+                        <div class="order-name">${o.point} · ${o.item} · ${o.type}</div>
+                        <div class="order-meta">${o.reporter} · 刚刚上报</div>
+                    </div>
+                    <div class="order-tag">#AS-${o.id}</div>
+                `;
+                content.appendChild(row);
+            });
+            view.classList.add('active');
+        }
+
+        function hideList() {
+            document.getElementById('listView').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
